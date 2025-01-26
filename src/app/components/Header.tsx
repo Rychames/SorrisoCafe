@@ -12,7 +12,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-[#5a7f78] text-white shadow-md fixed top-0 w-full z-50 print:hidden">
+    <header className="bg-[#5a7f78] text-white shadow-md  top-0 w-full z-50 print:hidden">
       <nav className="bg-[#5a7f78]">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <a href="#" className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -57,7 +57,7 @@ export default function Header() {
               </li>
               <li>
                 <Link
-                  href="/form"
+                  href="/add-product"
                   className="block py-2 px-3 text-white hover:text-gray-300"
                 >
                   Novo Produto
