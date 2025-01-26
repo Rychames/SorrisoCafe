@@ -19,3 +19,107 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* global.css ou styles.css */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  header {
+    display: none;
+  }
+
+  .flex {
+    display: block !important;
+  }
+   
+  .min-h-screen {
+    min-height: auto !important;
+  }
+
+  .bg-gray-50 {
+    background-color: white !important;
+  }
+
+  .bg-white {
+    background-color: white !important;
+  }
+
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  .rounded-lg {
+    border-radius: 4px !important;
+  }
+
+  .w-full {
+    width: 100% !important;
+  }
+
+  .p-6 {
+    padding: 16px !important;
+  }
+
+  .max-w-md {
+    max-width: 100% !important;
+  }
+
+  /* Ajuste para que tudo se encaixe em uma página */
+  .bg-white {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 10mm;
+    border: 1px solid #ccc;
+  }
+
+  /* Ajusta o QR Code */
+  img {
+    width: 100px;
+    height: 100px;
+    margin: 10px auto;
+  }
+
+  /* Ajuste para o tamanho da fonte */
+  .text-lg {
+    font-size: 14px !important;
+  }
+
+  .text-xl {
+    font-size: 18px !important;
+  }
+
+  /* Ocultar o botão de impressão e outros elementos desnecessários na impressão */
+  .hidden-print {
+    display: none !important;
+  }
+
+  .text-gray-700 {
+    color: #333 !important;
+  }
+
+  .text-gray-800 {
+    color: #222 !important;
+  }
+
+  /* Ocultar elementos indesejados, como o botão flutuante do Next.js e a quantidade de páginas */
+  .next-float-button,
+  .page-count,
+  .impressao-data {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* Remover elementos indesejados na impressão */
+  .no-print {
+    display: none;
+  }
+}
