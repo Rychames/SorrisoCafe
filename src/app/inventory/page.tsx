@@ -24,7 +24,7 @@ export default function InventoryPage() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await fetch("http://26.102.188.40:5000/api/inventory");
+        const response = await fetch("https://ppscannerbackend-production.up.railway.app/api/inventory");
         const data = await response.json();
         console.log("Dados carregados:", data); // Log para verificar os dados
         setItems(data);
