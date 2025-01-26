@@ -12,6 +12,8 @@ import {
     FaClock,
     FaPen,
     FaWeight,
+    FaImage,
+    FaPlus,
 } from "react-icons/fa"; // Ícones
 
 export default function FormPage() {
@@ -29,6 +31,9 @@ export default function FormPage() {
         receivedBy: "",
         deliveryTime: "",
     });
+
+    const [images, setImages] = useState<File[]>([]);
+    const [previewImages, setPreviewImages] = useState<string[]>([]);
 
     const router = useRouter();
 
@@ -48,6 +53,20 @@ export default function FormPage() {
 
         if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
             setFormData({ ...formData, [name]: e.target.checked });
+        } else if (e.target instanceof HTMLInputElement && e.target.type === "file") {
+            const files = Array.from(e.target.files || []);
+            const newImages = [...images, ...files];
+
+            if (newImages.length > 5) {
+                Swal.fire("Erro!", "Você pode enviar no máximo 5 imagens.", "error");
+                return;
+            }
+
+            setImages(newImages);
+
+            // Atualiza as pré-visualizações
+            const previews = newImages.map((file) => URL.createObjectURL(file));
+            setPreviewImages(previews);
         } else {
             setFormData({ ...formData, [name]: value });
         }
@@ -61,17 +80,28 @@ export default function FormPage() {
         setFormData({ ...formData, deliveryTime: currentTime });
     };
 
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const formDataToSend = new FormData();
+            Object.keys(formData).forEach((key) => {
+                const value = formData[key as keyof typeof formData];
+                formDataToSend.append(key, value.toString());
+            });
+
+            images.forEach((image) => {
+                formDataToSend.append("images", image);
+            });
+
             const response = await fetch(
                 "https://ppscannerbackend-production.up.railway.app/api/inventory",
                 {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData),
+                    body: formDataToSend,
                 }
             );
+
             if (!response.ok) throw new Error("Erro ao cadastrar produto.");
             Swal.fire("Sucesso!", "Produto cadastrado com sucesso!", "success");
             router.push("/inventory");
@@ -243,6 +273,51 @@ export default function FormPage() {
                             >
                                 Hora Atual
                             </button>
+                        </div>
+                    </div>
+
+                    {/* Upload de Imagens */}
+                    <div className="space-y-4">
+                        <label className="text-gray-700 font-bold mb-2 flex items-center space-x-2">
+                            <FaImage className="text-green-500" />
+                            <span>Imagens do Produto</span>
+                        </label>
+                        <div className="border border-gray-300 p-4 rounded-lg bg-gray-50">
+                            <div className="flex items-center justify-between">
+                                <p className="text-gray-500 text-sm">
+                                    Você pode enviar até 5 imagens.
+                                </p>
+                                <label
+                                    htmlFor="image-upload"
+                                    className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center space-x-2"
+                                >
+                                    <FaPlus className="text-white" />
+                                    <span>Adicionar Imagem</span>
+                                </label>
+                                <input
+                                    type="file"
+                                    name="images"
+                                    multiple
+                                    accept="image/*"
+                                    className="hidden"
+                                    id="image-upload"
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {previewImages.map((src, index) => (
+                                    <div
+                                        key={index}
+                                        className="relative rounded-lg overflow-hidden shadow-lg"
+                                    >
+                                        <img
+                                            src={src}
+                                            alt={`Prévia ${index + 1}`}
+                                            className="w-full h-32 object-cover"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
