@@ -3,35 +3,60 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Definir o tipo para o item do inventário
+interface InventoryItem {
+  id: number;
+  name: string;
+  category: string;
+  description: string;
+  quantity: number;
+  qr_code: string;
+}
+
 export default function InventoryPage() {
-  const [items, setItems] = useState([]);
-  const [filteredItems, setFilteredItems] = useState([]);
-  const [categoryFilter, setCategoryFilter] = useState("");
+  // Tipar os estados para armazenar os itens
+  const [items, setItems] = useState<InventoryItem[]>([]); // Todos os itens
+  const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]); // Itens filtrados
+  const [categoryFilter, setCategoryFilter] = useState(""); // Filtro de categoria
   const router = useRouter();
 
+  // Carregar itens da API ao montar o componente
   useEffect(() => {
     const fetchItems = async () => {
-      const response = await fetch("http://26.102.188.40:5000/api/inventory");
-      const data = await response.json();
-      setItems(data);
-      setFilteredItems(data);
+      try {
+        const response = await fetch("http://26.102.188.40:5000/api/inventory");
+        const data = await response.json();
+        console.log("Dados carregados:", data); // Log para verificar os dados
+        setItems(data);
+        setFilteredItems(data); // Inicialmente, todos os itens são exibidos
+      } catch (error) {
+        console.error("Erro ao carregar os itens:", error);
+      }
     };
     fetchItems();
   }, []);
 
+  // Lidar com mudança no filtro de categoria
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const category = e.target.value;
     setCategoryFilter(category);
+
     if (category === "") {
+      // Mostrar todos os itens se o filtro estiver vazio
       setFilteredItems(items);
     } else {
-      setFilteredItems(items.filter((item) => item.category === category));
+      // Filtrar itens pela categoria selecionada
+      setFilteredItems(
+        items.filter((item) => item.category && item.category === category)
+      );
     }
   };
 
   return (
     <div className="p-4 md:p-8">
       <h1 className="text-3xl font-bold mb-6">Inventário</h1>
+
+      {/* Filtro por categoria */}
       <div className="mb-4">
         <select
           className="border border-gray-300 p-2 rounded"
@@ -39,6 +64,7 @@ export default function InventoryPage() {
           onChange={handleFilterChange}
         >
           <option value="">Todas as Categorias</option>
+          {/* Gerar opções de categoria dinamicamente */}
           {[...new Set(items.map((item) => item.category))].map((cat) => (
             <option key={cat} value={cat}>
               {cat}
@@ -46,6 +72,8 @@ export default function InventoryPage() {
           ))}
         </select>
       </div>
+
+      {/* Lista de itens */}
       <ul className="space-y-4">
         {filteredItems.map((item) => (
           <li
@@ -54,7 +82,9 @@ export default function InventoryPage() {
             onClick={() => router.push(`/product/${item.id}`)}
           >
             <h2 className="text-xl font-bold">{item.name}</h2>
-            <p>Categoria: {item.category}</p>
+            <p>Categoria: {item.category || "Sem Categoria"}</p>
+            <p>Descrição: {item.description}</p>
+            <p>Quantidade: {item.quantity}</p>
           </li>
         ))}
       </ul>
