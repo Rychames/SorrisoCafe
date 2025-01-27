@@ -30,6 +30,7 @@ export default function FormPage() {
         deliveredBy: "",
         receivedBy: "",
         deliveryTime: "",
+        images: [],
     });
 
     const [images, setImages] = useState<File[]>([]);
@@ -79,7 +80,6 @@ export default function FormPage() {
         });
         setFormData({ ...formData, deliveryTime: currentTime });
     };
-
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
