@@ -69,7 +69,7 @@ export default function ProductDetails() {
           {/* Renderização do QR Code */}
           <div className="print-only">
             <h1 className="text-xl font-bold">Produto: {product.name}</h1>
-            <QRCodeSVG value={`http://192.168.1.142/:3000/product/${product.id}`} size={256} className="mx-auto my-4" />
+            <QRCodeSVG value={`https://ppscannerbackend-production.up.railway.app/api/inventory/detail/${product.id}`} size={256} className="mx-auto my-4" />
             <p className="text-sm">Escaneie o código para acessar a página do produto.</p>
           </div>
         </div>
