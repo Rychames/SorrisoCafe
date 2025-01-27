@@ -16,6 +16,7 @@ export default function RootLayout({
     <html lang="pt-br">
       <body>
         <Header />
+        <link rel="icon" type="image/png" href="/ppicon.svg" sizes='32x32'/>
         <main className="min-h-screen flex flex-col">
           {children}
         </main>
