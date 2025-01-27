@@ -12,6 +12,7 @@ interface InventoryItem {
   description: string;
   quantity: number;
   qr_code: string;
+  images: string[]; // Array de URLs de imagens
 }
 
 export default function InventoryPage() {
@@ -141,8 +142,23 @@ export default function InventoryPage() {
                 <li
                   key={item.id}
                   className="p-4 bg-white shadow rounded-lg relative"
+                  onClick={() => router.push(`/product/${item.id}`)}
                 >
                   <h2 className="text-xl font-bold">{item.name}</h2>
+                  {item.images && item.images.length > 0 ? (
+                    <div>
+                      <img
+                        src={item.images[0]}
+                        alt={`${item.name} image`}
+                        className="w-full h-48 object-cover rounded-lg mb-4"
+                      />
+                      {item.images.length > 1 && (
+                        <p>{`Mais ${item.images.length - 1} imagem(s) disponível(s)`}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p>No image available</p>
+                  )}
                   <p>Categoria: {item.category || "Sem Categoria"}</p>
                   <p>Descrição: {item.description}</p>
                   <p>Quantidade: {item.quantity}</p>

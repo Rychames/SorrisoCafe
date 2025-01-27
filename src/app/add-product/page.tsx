@@ -14,7 +14,7 @@ import {
     FaWeight,
     FaImage,
     FaPlus,
-} from "react-icons/fa"; // Ícones
+} from "react-icons/fa";
 
 export default function FormPage() {
     const [formData, setFormData] = useState({
@@ -30,7 +30,6 @@ export default function FormPage() {
         deliveredBy: "",
         receivedBy: "",
         deliveryTime: "",
-        images: [],
     });
 
     const [images, setImages] = useState<File[]>([]);
@@ -53,7 +52,7 @@ export default function FormPage() {
         const { name, value } = e.target;
 
         if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
-            setFormData({ ...formData, [name]: e.target.checked });
+            setFormData({ ...formData, [name]: e.target.checked ? '1' : '0' });
         } else if (e.target instanceof HTMLInputElement && e.target.type === "file") {
             const files = Array.from(e.target.files || []);
             const newImages = [...images, ...files];
@@ -65,7 +64,6 @@ export default function FormPage() {
 
             setImages(newImages);
 
-            // Atualiza as pré-visualizações
             const previews = newImages.map((file) => URL.createObjectURL(file));
             setPreviewImages(previews);
         } else {
@@ -81,31 +79,48 @@ export default function FormPage() {
         setFormData({ ...formData, deliveryTime: currentTime });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        const form = new FormData();
+
+        // Adicionando os dados do produto ao FormData, convertendo números e booleanos para string
+        for (const key in formData) {
+            const value = formData[key as keyof typeof formData];
+            console.log(`Adicionando ao FormData: ${key}: ${value}`);
+            if (typeof value === "boolean") {
+                form.append(key, value.toString());
+            } else if (typeof value === "number") {
+                form.append(key, value.toString());
+            } else {
+                form.append(key, value);
+            }
+        }
+
+        // Adicionando as imagens ao FormData
+        images.forEach((image) => {
+            console.log(`Adicionando imagem ao FormData: ${image.name}`);
+            form.append("images", image);
+        });
+
+        console.log("Dados que estão sendo enviados:", formData);
+
         try {
-            const formDataToSend = new FormData();
-            Object.keys(formData).forEach((key) => {
-                const value = formData[key as keyof typeof formData];
-                formDataToSend.append(key, value.toString());
+            const response = await fetch("http://localhost:5000/api/inventory", {
+                method: "POST",
+                body: form,
             });
 
-            images.forEach((image) => {
-                formDataToSend.append("images", image);
-            });
+            console.log("Resposta do servidor:", response);
 
-            const response = await fetch(
-                "https://ppscannerbackend-production.up.railway.app/api/inventory",
-                {
-                    method: "POST",
-                    body: formDataToSend,
-                }
-            );
+            if (!response.ok) {
+                throw new Error("Erro ao cadastrar produto.");
+            }
 
-            if (!response.ok) throw new Error("Erro ao cadastrar produto.");
             Swal.fire("Sucesso!", "Produto cadastrado com sucesso!", "success");
             router.push("/inventory");
         } catch (error) {
+            console.error("Erro no cadastro:", error);
             Swal.fire("Erro!", "Falha ao cadastrar produto.", "error");
         }
     };
@@ -313,7 +328,7 @@ export default function FormPage() {
                                         <img
                                             src={src}
                                             alt={`Prévia ${index + 1}`}
-                                            className="w-full h-32 object-cover"
+                                            className="w-full h-full object-cover"
                                         />
                                     </div>
                                 ))}
@@ -321,10 +336,9 @@ export default function FormPage() {
                         </div>
                     </div>
 
-                    {/* Botão */}
                     <button
                         type="submit"
-                        className="w-full bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 font-bold shadow-md"
+                        className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300"
                     >
                         Cadastrar Produto
                     </button>
