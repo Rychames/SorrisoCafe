@@ -1,8 +1,9 @@
-"use client";
+"use client"
 
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import {
     FaUser,
     FaTag,
@@ -17,16 +18,16 @@ import {
 } from "react-icons/fa";
 
 export default function FormPage() {
+
     const [formData, setFormData] = useState({
         name: "",
         category: "",
-        description: "",
-        quantity: 0,
-        size: "",
         model: "",
         brand: "",
+        description: "",
+        quantity: "",
+        size: "",
         unitOrBox: false,
-        deliveryCompany: "",
         deliveredBy: "",
         receivedBy: "",
         deliveryTime: "",
@@ -34,112 +35,70 @@ export default function FormPage() {
 
     const [images, setImages] = useState<File[]>([]);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
-
     const router = useRouter();
 
-    const categories = ["Eletrônicos", "Móveis", "Alimentos", "Vestuário", "Outros"];
-    const deliveryCompanies = [
-        "Mercado Livre",
-        "Shein",
-        "Shopee",
-        "Amazon",
-        "Outros",
-    ];
+    const categories = ["Eletrônicos", "Roupas", "Alimentos"]; // Exemplo de categorias
 
     const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-    ) => {
-        const { name, value } = e.target;
-
-        if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
-            setFormData({ ...formData, [name]: e.target.checked ? "1" : "0" });
-        } else if (e.target instanceof HTMLInputElement && e.target.type === "file") {
-            const files = Array.from(e.target.files || []);
-            const newImages = [...images, ...files];
-
-            if (newImages.length > 5) {
-                Swal.fire("Erro!", "Você pode enviar no máximo 5 imagens.", "error");
-                return;
-            }
-
-            setImages(newImages);
-
-            // Convertendo para base64
-            const fileReaders = newImages.map((file) => {
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result as string);
-                    reader.readAsDataURL(file);
-                });
-            });
-
-
-
-            Promise.all(fileReaders).then((base64Images) => {
-                setPreviewImages(base64Images as string[]);
-            });
-        } else {
-            setFormData({ ...formData, [name]: value });
-        }
-    };
-
-
-    const setCurrentTime = () => {
-        const currentTime = new Date().toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+      ) => {
+        const { name, value, type } = e.target;
+      
+        setFormData({
+          ...formData,
+          [name]:
+            type === "checkbox"
+              ? (e.target as HTMLInputElement).checked
+                ? 1
+                : 0
+              : value,
         });
-        setFormData({ ...formData, deliveryTime: currentTime });
+      };
+      
+    
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files) return;
+
+        const files = Array.from(e.target.files);
+        setImages(files);
+
+        const previews = files.map((file) => URL.createObjectURL(file));
+        setPreviewImages(previews);
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    
-        const form = new FormData();
-    
-        // Adicionando os dados do produto ao FormData
-        for (const key in formData) {
-            const value = formData[key as keyof typeof formData];
-            if (typeof value === "boolean") {
-                form.append(key, value.toString());
-            } else if (typeof value === "number") {
-                form.append(key, value.toString());
-            } else {
-                form.append(key, value);
-            }
-        }
-    
-        // Aqui, enviando as imagens base64 (não arquivos físicos)
-        previewImages.forEach((image) => {
-            form.append("images", image); // Imagens em base64
-        });
-    
-        try {
-            const response = await fetch("https://ppscannerbackend-production.up.railway.app/api/inventory", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",  // Importante para enviar JSON
-                },
-                body: JSON.stringify(formData), // O corpo da requisição é o formData como JSON
-            });
-    
-            if (!response.ok) {
-                throw new Error("Erro ao cadastrar produto.");
-            }
-    
-            Swal.fire("Sucesso!", "Produto cadastrado com sucesso!", "success");
-            router.push("/inventory");
-        } catch (error) {
-            Swal.fire("Erro!", "Falha ao cadastrar produto.", "error");
-        }
-    
-        console.log("Dados que estão sendo enviados ao backend:", {
-            ...formData,
-            images: previewImages, // Certifique-se de enviar as imagens base64
-        });
-    };
-    
 
+        const form = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+            form.append(key, String(value));
+        });
+
+        images.forEach((image) => {
+            form.append("images", image); // "images" será a chave usada no backend
+        });
+
+        try {
+            const response = await axios.post("http://localhost:5000/api/inventory", form, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            console.log(response.data);
+
+            if (response.status === 200) {
+                Swal.fire("Sucesso", "Produto cadastrado com sucesso!", "success");
+                router.push("/produtos");
+            }
+        } catch (error) {
+            console.error("Erro ao enviar o formulário:", error);
+            Swal.fire("Erro", "Falha ao cadastrar o produto.", "error");
+        }
+    };
+
+    const [currentTime, setCurrentTime] = useState<string>("");
 
     return (
         <div className="p-6 md:p-12 bg-gray-100 min-h-screen relative z-10">
@@ -299,7 +258,7 @@ export default function FormPage() {
                             />
                             <button
                                 type="button"
-                                onClick={setCurrentTime}
+                                onClick={() => setCurrentTime(new Date().toLocaleTimeString())}
                                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                             >
                                 Hora Atual
@@ -332,7 +291,7 @@ export default function FormPage() {
                                     accept="image/*"
                                     className="hidden"
                                     id="image-upload"
-                                    onChange={handleInputChange}
+                                    onChange={handleImageUpload}
                                 />
                             </div>
                             <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">

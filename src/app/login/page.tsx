@@ -1,6 +1,28 @@
-import Link from 'next/link';
+"use client";
 
-export default function Login() {
+import { useState } from "react";
+
+import { useAuth } from "@/app/context/AuthContext";
+import Link from "next/link";
+
+export default function LoginPage() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const { login } = useAuth();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+
+        try {
+            await login(email, password); // Faz login usando o contexto
+        } catch (err: any) {
+            setError(err.message || "Erro ao fazer login");
+        }
+    };
+
     return (
         <section className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center">
             <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto lg:py-0">
@@ -8,18 +30,14 @@ export default function Login() {
                     href="#"
                     className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
                 >
-                    <img
-                        className="mr-2"
-                        src="/ppscanner.svg"
-                        alt="logo"
-                    />
+                    <img className="mr-2" src="/ppscanner.svg" alt="logo" />
                 </a>
                 <div className="w-full bg-white rounded-lg shadow dark:border sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
                     <div className="p-6 space-y-4 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                             Faça login na sua conta
                         </h1>
-                        <form className="space-y-4" action="#">
+                        <form className="space-y-4" onSubmit={handleSubmit}>
                             <div>
                                 <label
                                     htmlFor="email"
@@ -34,6 +52,8 @@ export default function Login() {
                                     className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="name@company.com"
                                     required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                             <div>
@@ -50,8 +70,13 @@ export default function Login() {
                                     placeholder="••••••••"
                                     className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
+                            {error && (
+                                <p className="text-sm text-red-500">{error}</p>
+                            )}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-start">
                                     <div className="flex items-center h-5">
@@ -87,15 +112,11 @@ export default function Login() {
                             <Link href="./signup">
                                 <p className="text-sm font-light text-gray-500 dark:text-gray-400 me-5 mt-5">
                                     Você ainda não tem uma conta?{" "}
-                                    <a
-                                        href="#"
-                                        className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                                    >
+                                    <span className="font-medium text-primary-600 hover:underline dark:text-primary-500">
                                         Cadastre-se
-                                    </a>
+                                    </span>
                                 </p>
                             </Link>
-
                         </form>
                     </div>
                 </div>

@@ -1,8 +1,51 @@
-// src/app/signup/page.tsx
+"use client"; // para ativar o uso de hooks no componente
+
 import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { apiUrl } from "@/app/utils/constantes";
 
 export default function SignupPage() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
+    const router = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+
+        if (password !== confirmPassword) {
+            setError("As senhas não coincidem.");
+            return;
+        }
+
+        try {
+            const response = await axios.post(`${apiUrl}user/register/`, {
+                email: email,
+                password: password,
+                confirm_password: confirmPassword,
+            });
+
+            console.log("Cadastro realizado com sucesso:", response.data);
+
+            // Redireciona para a tela de login após o cadastro
+            router.push("/VerifyCodePage");
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                // Erro relacionado ao Axios
+                setError(err.response?.data?.message || "Erro ao realizar cadastro. Tente novamente.");
+            } else {
+                // Outros tipos de erro
+                setError("Erro inesperado. Tente novamente.");
+            }
+            console.error("Erro ao realizar cadastro:", err);
+        }
+
+    };
+
     return (
         <section className="bg-gray-50 dark:bg-gray-900">
             <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -10,18 +53,14 @@ export default function SignupPage() {
                     href="#"
                     className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
                 >
-                    <img
-                        className="mr-2"
-                        src="/ppscanner.svg"
-                        alt="logo"
-                    />
+                    <img className="mr-2" src="/ppscanner.svg" alt="logo" />
                 </a>
                 <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                             Crie sua conta
                         </h1>
-                        <form className="space-y-4 md:space-y-6" action="#">
+                        <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                             <div>
                                 <label
                                     htmlFor="email"
@@ -36,6 +75,8 @@ export default function SignupPage() {
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="nome@empresa.com"
                                     required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                             <div>
@@ -52,6 +93,8 @@ export default function SignupPage() {
                                     placeholder="••••••••"
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
                             <div>
@@ -68,8 +111,11 @@ export default function SignupPage() {
                                     placeholder="••••••••"
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                 />
                             </div>
+                            {error && <p className="text-sm text-red-500">{error}</p>}
                             <div className="flex items-start">
                                 <div className="flex items-center h-5">
                                     <input
@@ -101,7 +147,7 @@ export default function SignupPage() {
                             >
                                 Criar conta
                             </button>
-                            <Link href="./login">
+                            <Link href="/login">
                                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                                     Já tem uma conta?{" "}
                                     <a
@@ -112,7 +158,6 @@ export default function SignupPage() {
                                     </a>
                                 </p>
                             </Link>
-
                         </form>
                     </div>
                 </div>
