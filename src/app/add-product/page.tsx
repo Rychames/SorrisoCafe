@@ -106,7 +106,7 @@ export default function FormPage() {
         console.log("Dados que estão sendo enviados:", formData);
 
         try {
-            const response = await fetch("http://localhost:5000/api/inventory", {
+            const response = await fetch("https://ppscannerbackend-production.up.railway.app/api/inventory", {
                 method: "POST",
                 body: form,
             });
