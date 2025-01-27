@@ -145,6 +145,8 @@ export default function InventoryPage() {
                   onClick={() => router.push(`/product/${item.id}`)}
                 >
                   <h2 className="text-xl font-bold">{item.name}</h2>
+                  
+                  {/* Exibindo imagem principal */}
                   {item.images && item.images.length > 0 ? (
                     <div>
                       <img
@@ -159,6 +161,8 @@ export default function InventoryPage() {
                   ) : (
                     <p>No image available</p>
                   )}
+
+                  {/* Informações adicionais */}
                   <p>Categoria: {item.category || "Sem Categoria"}</p>
                   <p>Descrição: {item.description}</p>
                   <p>Quantidade: {item.quantity}</p>

@@ -52,7 +52,7 @@ export default function FormPage() {
         const { name, value } = e.target;
 
         if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
-            setFormData({ ...formData, [name]: e.target.checked ? '1' : '0' });
+            setFormData({ ...formData, [name]: e.target.checked ? "1" : "0" });
         } else if (e.target instanceof HTMLInputElement && e.target.type === "file") {
             const files = Array.from(e.target.files || []);
             const newImages = [...images, ...files];
@@ -64,12 +64,25 @@ export default function FormPage() {
 
             setImages(newImages);
 
-            const previews = newImages.map((file) => URL.createObjectURL(file));
-            setPreviewImages(previews);
+            // Convertendo para base64
+            const fileReaders = newImages.map((file) => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.readAsDataURL(file);
+                });
+            });
+
+
+
+            Promise.all(fileReaders).then((base64Images) => {
+                setPreviewImages(base64Images as string[]);
+            });
         } else {
             setFormData({ ...formData, [name]: value });
         }
     };
+
 
     const setCurrentTime = () => {
         const currentTime = new Date().toLocaleTimeString("pt-BR", {
@@ -81,13 +94,12 @@ export default function FormPage() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
+    
         const form = new FormData();
-
-        // Adicionando os dados do produto ao FormData, convertendo números e booleanos para string
+    
+        // Adicionando os dados do produto ao FormData
         for (const key in formData) {
             const value = formData[key as keyof typeof formData];
-            console.log(`Adicionando ao FormData: ${key}: ${value}`);
             if (typeof value === "boolean") {
                 form.append(key, value.toString());
             } else if (typeof value === "number") {
@@ -96,34 +108,38 @@ export default function FormPage() {
                 form.append(key, value);
             }
         }
-
-        // Adicionando as imagens ao FormData
-        images.forEach((image) => {
-            console.log(`Adicionando imagem ao FormData: ${image.name}`);
-            form.append("images", image);
+    
+        // Aqui, enviando as imagens base64 (não arquivos físicos)
+        previewImages.forEach((image) => {
+            form.append("images", image); // Imagens em base64
         });
-
-        console.log("Dados que estão sendo enviados:", formData);
-
+    
         try {
             const response = await fetch("https://ppscannerbackend-production.up.railway.app/api/inventory", {
                 method: "POST",
-                body: form,
+                headers: {
+                    "Content-Type": "application/json",  // Importante para enviar JSON
+                },
+                body: JSON.stringify(formData), // O corpo da requisição é o formData como JSON
             });
-
-            console.log("Resposta do servidor:", response);
-
+    
             if (!response.ok) {
                 throw new Error("Erro ao cadastrar produto.");
             }
-
+    
             Swal.fire("Sucesso!", "Produto cadastrado com sucesso!", "success");
             router.push("/inventory");
         } catch (error) {
-            console.error("Erro no cadastro:", error);
             Swal.fire("Erro!", "Falha ao cadastrar produto.", "error");
         }
+    
+        console.log("Dados que estão sendo enviados ao backend:", {
+            ...formData,
+            images: previewImages, // Certifique-se de enviar as imagens base64
+        });
     };
+    
+
 
     return (
         <div className="p-6 md:p-12 bg-gray-100 min-h-screen relative z-10">
