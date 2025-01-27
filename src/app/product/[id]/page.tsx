@@ -58,6 +58,14 @@ export default function ProductDetails() {
             <strong className="text-gray-700">Quantidade:</strong> {product.quantity}
           </p>
 
+          <p className="text-lg">
+            <strong className="text-gray-700">Entregue por:</strong> {product.deliveredBy}
+          </p>
+
+          <p className="text-lg">
+            <strong className="text-gray-700">Recebido por:</strong> {product.receivedBy}
+          </p>
+
           {/* Renderização do QR Code */}
           <div className="print-only">
             <h1 className="text-xl font-bold">Produto: {product.name}</h1>
