@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import Swal from "sweetalert2";
@@ -18,7 +18,6 @@ import {
 } from "react-icons/fa";
 
 export default function FormPage() {
-
     const [formData, setFormData] = useState({
         name: "",
         category: "",
@@ -40,22 +39,22 @@ export default function FormPage() {
     const categories = ["Eletrônicos", "Roupas", "Alimentos"]; // Exemplo de categorias
 
     const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-      ) => {
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+        >
+    ) => {
         const { name, value, type } = e.target;
-      
+
         setFormData({
-          ...formData,
-          [name]:
-            type === "checkbox"
-              ? (e.target as HTMLInputElement).checked
-                ? 1
-                : 0
-              : value,
+            ...formData,
+            [name]:
+                type === "checkbox"
+                    ? (e.target as HTMLInputElement).checked
+                        ? 1
+                        : 0
+                    : value,
         });
-      };
-      
-    
+    };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
@@ -79,14 +78,29 @@ export default function FormPage() {
             form.append("images", image); // "images" será a chave usada no backend
         });
 
-        try {
-            const response = await axios.post("http://localhost:5000/api/inventory", form, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+        // Logando os dados enviados no console
+        console.log("Dados do Formulário:");
+        Object.entries(formData).forEach(([key, value]) => {
+            console.log(`${key}: ${value}`);
+        });
 
-            console.log(response.data);
+        console.log("Imagens:");
+        images.forEach((image, index) => {
+            console.log(`Imagem ${index + 1}:`, image.name);
+        });
+
+        try {
+            const response = await axios.post(
+                "http://10.0.0.173:8000/api/inventory/",
+                form,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            console.log("Resposta do Servidor:", response.data);
 
             if (response.status === 200) {
                 Swal.fire("Sucesso", "Produto cadastrado com sucesso!", "success");
@@ -98,7 +112,6 @@ export default function FormPage() {
         }
     };
 
-    const [currentTime, setCurrentTime] = useState<string>("");
 
     return (
         <div className="p-6 md:p-12 bg-gray-100 min-h-screen relative z-10">
@@ -256,13 +269,6 @@ export default function FormPage() {
                                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
                                 onChange={handleInputChange}
                             />
-                            <button
-                                type="button"
-                                onClick={() => setCurrentTime(new Date().toLocaleTimeString())}
-                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-                            >
-                                Hora Atual
-                            </button>
                         </div>
                     </div>
 
