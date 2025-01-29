@@ -3,34 +3,32 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import axios from "axios";
+import { Product } from "@/app/models";
 
 // Definir o tipo para o item do inventário
-interface InventoryItem {
-  id: number;
-  name: string;
-  category: string;
-  description: string;
-  quantity: number;
-  qr_code: string;
-  images: string[]; // Array de URLs de imagens
-}
+
 
 export default function InventoryPage() {
-  const [items, setItems] = useState<InventoryItem[]>([]); // Todos os itens
-  const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]); // Itens filtrados
+  const [items, setItems] = useState<Product[]>([]); // Todos os itens
+  const [filteredItems, setFilteredItems] = useState<Product[]>([]); // Itens filtrados
   const [categoryFilter, setCategoryFilter] = useState(""); // Filtro de categoria
   const [searchTerm, setSearchTerm] = useState(""); // Termo de pesquisa
   const [loading, setLoading] = useState(true); // Estado de carregamento
   const router = useRouter();
 
+  const token = localStorage.getItem('authToken');
+
   // Carregar itens da API ao montar o componente
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await fetch(
-          "https://ppscannerbackend-production.up.railway.app/api/inventory"
-        );
-        const data = await response.json();
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/products/",
+          
+        );      
+        const data = response.data['data'];
+        console.log(data);
         setItems(data);
         setFilteredItems(data); // Inicialmente, todos os itens são exibidos
       } catch (error) {
@@ -150,7 +148,7 @@ export default function InventoryPage() {
                   {item.images && item.images.length > 0 ? (
                     <div>
                       <img
-                        src={item.images[0]}
+                        src={item.images[0].image}
                         alt={`${item.name} image`}
                         className="w-full h-48 object-cover rounded-lg mb-4"
                       />
