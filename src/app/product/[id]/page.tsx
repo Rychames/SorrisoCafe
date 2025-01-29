@@ -3,28 +3,22 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react"; // Corrigido para usar QRCodeSVG
-<<<<<<< HEAD
-import axios from "axios";
-import { Product } from "@/app/models";
-
-=======
 import { BASE_URL, apiUrl } from "@/app/utils/constantes";
->>>>>>> fdb4d90b821498e438d3a8d10fc1a52dcf5bdb24
 
 export default function ProductDetails() {
   const params = useParams(); // Acessa os parâmetros de URL
-  const [product, setProduct] = useState<Product>();
+  const [product, setProduct] = useState<any>(null);
 
   // Função para buscar o produto usando o ID
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         if (!params.id) return; // Verifica se o ID existe
-        const response = await axios.get(
-          `http://127.0.0.1:8000/api/products/${params.id}`,
-        );      
-        const data = response.data['data'];
-        console.log(data)
+        const response = await fetch(`${BASE_URL}api/inventory/detail/${params.id}`);
+        if (!response.ok) {
+          throw new Error("Erro ao buscar o produto");
+        }
+        const data = await response.json();
         setProduct(data); // Define os dados do produto
       } catch (error) {
         console.error("Erro ao buscar o produto:", error);
@@ -65,11 +59,11 @@ export default function ProductDetails() {
           </p>
 
           <p className="text-lg">
-            <strong className="text-gray-700">Entregue por:</strong> {product.delivered_by}
+            <strong className="text-gray-700">Entregue por:</strong> {product.deliveredBy}
           </p>
 
           <p className="text-lg">
-            <strong className="text-gray-700">Recebido por:</strong> {product.received_by.email}
+            <strong className="text-gray-700">Recebido por:</strong> {product.receivedBy}
           </p>
 
           {/* Renderização do QR Code */}
