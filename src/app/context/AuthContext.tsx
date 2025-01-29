@@ -18,6 +18,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true); // Adicionando estado de loading
   const router = useRouter();
 
   useEffect(() => {
@@ -39,9 +40,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } catch (error) {
           console.error("Erro ao buscar dados do usuário", error);
           logout();
+        } finally {
+          setLoading(false); // Finaliza o loading
         }
       })();
     } else {
+      setLoading(false); // Finaliza o loading
       router.push("/login"); // Redireciona para o login se não houver token
     }
   }, []);
@@ -75,10 +79,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     router.push("/login");
   };
 
+  // Se estiver carregando, não renderize nada
+  if (loading) {
+    return null;
+  }
+
   return (
     <AuthContext.Provider value={{ user, setUser, token, login, logout }}>
-      {/* Só renderiza os filhos se houver um token */}
-      {token ? children : null}
+      {children}
     </AuthContext.Provider>
   );
 };

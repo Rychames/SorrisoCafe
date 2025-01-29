@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Menu, X, Home, PlusCircle, Search, LogIn, User, LogOut } from 'lucide-react';
-import { useAuth } from '@/app/context/AuthContext'; // Importe o contexto de autenticação
+import { useAuth } from '@/app/context/AuthContext';
+import Swal from 'sweetalert2';
+import ProtectedLink from './ProtectLink'; // Importe o componente ProtectedLink
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -48,27 +51,33 @@ export default function Header() {
           </div>
 
           <div
-            className={`${isMenuOpen ? 'block' : 'hidden'} w-full md:flex md:items-center md:w-auto`}
+            className={`${isMenuOpen ? 'block' : 'hidden'} w-full md:flex md:items-center md:w-auto overflow-visible`}
             id="navbar-default"
           >
             <ul className="font-medium flex flex-col p-4 md:flex-row md:space-x-8 w-full md:w-auto border border-gray-100 rounded-lg bg-[#004022] md:mt-0 md:border-0 md:bg-transparent">
               <li className="flex-1 md:flex-none">
-                <Link href="/" className="group flex items-center justify-center py-3 px-4 text-white hover:text-gray-300 relative">
-                  Home
-                  <span className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#004022] to-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-                </Link>
+                <ProtectedLink href="/">
+                  <div className="group flex items-center justify-center py-3 px-4 text-white hover:text-gray-300 relative">
+                    Home
+                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#004022] to-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+                  </div>
+                </ProtectedLink>
               </li>
               <li className="flex-1 md:flex-none">
-                <Link href="/add-product" className="group flex items-center justify-center py-3 px-4 text-white hover:text-gray-300 relative">
-                  Novo Produto
-                  <span className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#004022] to-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-                </Link>
+                <ProtectedLink href="/add-product">
+                  <div className="group flex items-center justify-center py-3 px-4 text-white hover:text-gray-300 relative">
+                    Novo Produto
+                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#004022] to-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+                  </div>
+                </ProtectedLink>
               </li>
               <li className="flex-1 md:flex-none">
-                <Link href="/inventory" className="group flex items-center justify-center py-3 px-4 text-white hover:text-gray-300 relative">
-                  Consultar Produtos
-                  <span className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#004022] to-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-                </Link>
+                <ProtectedLink href="/inventory">
+                  <div className="group flex items-center justify-center py-3 px-4 text-white hover:text-gray-300 relative">
+                    Consultar Produtos
+                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#004022] to-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+                  </div>
+                </ProtectedLink>
               </li>
               {token ? (
                 <li className="flex-1 md:flex-none relative">
@@ -81,11 +90,11 @@ export default function Header() {
                     Perfil
                   </button>
                   {isDropdownOpen && (
-                    <ul className="absolute bg-white text-black rounded-md shadow-lg right-0 mt-2 py-2 w-40">
+                    <ul className="absolute bg-white text-black rounded-md shadow-lg right-0 mt-2 py-2 w-40 z-50">
                       <li>
                         <button
                           onClick={handleLogout}
-                          className="block px-4 py-2 text-sm hover:bg-gray-200"
+                          className="block px-4 py-2 text-sm hover:bg-gray-200 w-full text-left"
                         >
                           <LogOut className="w-4 h-4 inline mr-2" />
                           Sair
