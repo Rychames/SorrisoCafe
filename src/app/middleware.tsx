@@ -2,6 +2,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Lista de rotas públicas compartilhada
+const publicRoutes = ["/login", "/signup", "/verify-code", "/not-found"];
+
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("authToken")?.value;
   const { pathname } = request.nextUrl;
@@ -12,11 +15,10 @@ export function middleware(request: NextRequest) {
     "/login",
     "/add-product",
     "/inventory",
-    "/not-found"
+    "/not-found",
+    "/signup",
+    "/verify-code"
   ];
-
-  // Rotas públicas (não requerem autenticação)
-  const publicRoutes = ["/login", "/not-found"];
 
   // Verifica se a rota é válida
   const isRouteValid = validRoutes.some(route => 
@@ -28,8 +30,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/not-found", request.url));
   }
 
-  // Redireciona usuários logados que tentam acessar login
-  if (pathname === "/login" && token) {
+  // Redireciona usuários logados que tentam acessar rotas públicas
+  if (publicRoutes.includes(pathname) && token) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

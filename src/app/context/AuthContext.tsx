@@ -15,6 +15,9 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// Lista de rotas públicas compartilhada
+const publicRoutes = ["/login", "/signup", "/verify-code", "/not-found"];
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -80,14 +83,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!loading) {
-      const isPublicPath = pathname === "/login";
+      const isPublicPath = publicRoutes.includes(pathname);
       
       // Redireciona usuários não autenticados tentando acessar rotas privadas
       if (!user && !isPublicPath) {
         router.push("/login");
       }
       
-      // Redireciona usuários autenticados tentando acessar a tela de login
+      // Redireciona usuários autenticados tentando acessar rotas públicas
       if (user && isPublicPath) {
         router.push("/");
       }
