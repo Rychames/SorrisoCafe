@@ -5,12 +5,20 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --primary: #1e40af;
+    --primary-foreground: #ffffff;
+    --secondary: #1e293b;
+    --secondary-foreground: #ffffff;
   }
 }
 
@@ -20,12 +28,37 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* global.css ou styles.css */
+a {
+  color: var(--primary);
+}
+
+a:hover {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+}
+
+button {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+
+button:hover {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
 @media print {
   body {
     margin: 0;
     padding: 0;
     text-align: center;
+    color: #000;
+    /* Forçar texto preto */
+    background: #fff;
+    /* Forçar fundo branco */
   }
 
   header {
@@ -35,7 +68,7 @@ body {
   .flex {
     display: block !important;
   }
-   
+
   .min-h-screen {
     min-height: auto !important;
   }
@@ -68,23 +101,12 @@ body {
     max-width: 100% !important;
   }
 
-  /* Ajuste para que tudo se encaixe em uma página */
-  .bg-white {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    padding: 10mm;
-    border: 1px solid #ccc;
-  }
-
-  /* Ajusta o QR Code */
   img {
     width: 100px;
     height: 100px;
     margin: 10px auto;
   }
 
-  /* Ajuste para o tamanho da fonte */
   .text-lg {
     font-size: 14px !important;
   }
@@ -93,7 +115,6 @@ body {
     font-size: 18px !important;
   }
 
-  /* Ocultar o botão de impressão e outros elementos desnecessários na impressão */
   .hidden-print {
     display: none !important;
   }
@@ -106,7 +127,6 @@ body {
     color: #222 !important;
   }
 
-  /* Ocultar elementos indesejados, como o botão flutuante do Next.js e a quantidade de páginas */
   .next-float-button,
   .page-count,
   .impressao-data {
@@ -118,7 +138,6 @@ body {
     margin: 0 auto;
   }
 
-  /* Remover elementos indesejados na impressão */
   .no-print {
     display: none;
   }
