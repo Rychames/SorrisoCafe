@@ -3,9 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react"; // Corrigido para usar QRCodeSVG
+<<<<<<< HEAD
 import axios from "axios";
 import { Product } from "@/app/models";
 
+=======
+import { BASE_URL, apiUrl } from "@/app/utils/constantes";
+>>>>>>> fdb4d90b821498e438d3a8d10fc1a52dcf5bdb24
 
 export default function ProductDetails() {
   const params = useParams(); // Acessa os parâmetros de URL

@@ -14,16 +14,19 @@ export default function AddProduct() {
     };
 
     return (
-        <div className="p-6 md:p-12 bg-gray-100 min-h-screen relative z-10">
-            <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg p-8">
+        <div className="p-6 md:p-12 bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen relative z-10">
+            <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden p-8">
                 <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">
                     Cadastrar Produto
                 </h1>
-                
-                <div className="mb-6">
-                    <label className="block text-gray-700 font-bold mb-2">Tipo de Inventário</label>
+
+                {/* Seletor de Tipo de Inventário */}
+                <div className="mb-8">
+                    <label className="block text-gray-700 font-semibold mb-3 text-lg">
+                        Tipo de Inventário
+                    </label>
                     <select
-                        className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
+                        className="w-full border-2 border-gray-200 p-4 rounded-xl focus:ring-2 focus:ring-green-400 focus:border-green-400 transition-all duration-200 ease-in-out"
                         onChange={handleInventoryChange}
                         value={inventoryType}
                     >
@@ -33,8 +36,11 @@ export default function AddProduct() {
                     </select>
                 </div>
 
-                {inventoryType === "pp" && <FormPPInventory />}
-                {inventoryType === "outras" && <FormOtherCompaniesInventory />}
+                {/* Renderização do Formulário */}
+                <div className="transition-all duration-300 ease-in-out">
+                    {inventoryType === "pp" && <FormPPInventory />}
+                    {inventoryType === "outras" && <FormOtherCompaniesInventory />}
+                </div>
             </div>
         </div>
     );

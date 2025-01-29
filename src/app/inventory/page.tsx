@@ -22,7 +22,9 @@ export default function InventoryPage() {
   // Carregar itens da API ao montar o componente
   useEffect(() => {
     const fetchItems = async () => {
+      console.log("📡 Buscando itens do inventário...");
       try {
+<<<<<<< HEAD
         const response = await axios.get(
           "http://127.0.0.1:8000/api/products/",
           
@@ -31,8 +33,21 @@ export default function InventoryPage() {
         console.log(data);
         setItems(data);
         setFilteredItems(data); // Inicialmente, todos os itens são exibidos
+=======
+        const response = await axios.get(`${BASE_URL}api/inventory`); 
+        console.log("✅ Dados recebidos da API:", response.data);
+
+        // Garantindo que as imagens sejam arrays válidos
+        const formattedData = response.data.map((item: InventoryItem) => ({
+          ...item,
+          images: item.images ? item.images : [], // Se images for null, converte para []
+        }));
+
+        setItems(formattedData);
+        setFilteredItems(formattedData);
+>>>>>>> fdb4d90b821498e438d3a8d10fc1a52dcf5bdb24
       } catch (error) {
-        console.error("Erro ao carregar os itens:", error);
+        console.error("❌ Erro ao carregar os itens:", error);
       } finally {
         setLoading(false);
       }
@@ -40,21 +55,18 @@ export default function InventoryPage() {
     fetchItems();
   }, []);
 
-  // Lidar com mudança no filtro de categoria
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const category = e.target.value;
     setCategoryFilter(category);
     applyFilters(searchTerm, category);
   };
 
-  // Lidar com a pesquisa
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setSearchTerm(term);
     applyFilters(term, categoryFilter);
   };
 
-  // Aplicar filtros (categoria e pesquisa)
   const applyFilters = (term: string, category: string) => {
     let filtered = items;
 
@@ -71,20 +83,16 @@ export default function InventoryPage() {
     setFilteredItems(filtered);
   };
 
-  // Lidar com exclusão de item
   const handleDelete = async (id: number) => {
+    console.log(`🗑️ Tentando excluir o item ID: ${id}`);
     try {
-      const response = await fetch(
-        `https://ppscannerbackend-production.up.railway.app/api/inventory/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (!response.ok) throw new Error("Erro ao excluir o produto.");
+      const response = await axios.delete(`${BASE_URL}api/inventory/${id}`);
+      console.log("✅ Produto excluído com sucesso:", response.data);
+
       setItems((prev) => prev.filter((item) => item.id !== id));
       setFilteredItems((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
-      console.error("Erro ao excluir o produto:", error);
+      console.error("❌ Erro ao excluir o produto:", error);
     }
   };
 
@@ -143,12 +151,16 @@ export default function InventoryPage() {
                   onClick={() => router.push(`/product/${item.id}`)}
                 >
                   <h2 className="text-xl font-bold">{item.name}</h2>
-                  
+
                   {/* Exibindo imagem principal */}
                   {item.images && item.images.length > 0 ? (
                     <div>
                       <img
+<<<<<<< HEAD
                         src={item.images[0].image}
+=======
+                        src={`data:image/png;base64,${item.images[0]}`}
+>>>>>>> fdb4d90b821498e438d3a8d10fc1a52dcf5bdb24
                         alt={`${item.name} image`}
                         className="w-full h-48 object-cover rounded-lg mb-4"
                       />
