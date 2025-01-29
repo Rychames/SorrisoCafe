@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Lista de rotas públicas compartilhada
-const publicRoutes = ["/login", "/signup", "/verify-code", "/not-found"];
+const publicRoutes = ["/login", "/signup", "/VerifyCodePage", "/not-found"];
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("authToken")?.value;
@@ -17,7 +17,7 @@ export function middleware(request: NextRequest) {
     "/inventory",
     "/not-found",
     "/signup",
-    "/verify-code"
+    "/VerifyCodePage"
   ];
 
   // Verifica se a rota é válida

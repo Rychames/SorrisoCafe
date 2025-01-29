@@ -1,7 +1,6 @@
-"use client"; // para ativar o uso de hooks no componente
-
+"use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { apiUrl } from "@/app/utils/constantes";
@@ -10,15 +9,24 @@ export default function SignupPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
+    const [toast, setToast] = useState<{ type: 'success' | 'danger', message: string } | null>(null);
     const router = useRouter();
+
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => {
+                setToast(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError("");
+        setToast(null);
 
         if (password !== confirmPassword) {
-            setError("As senhas não coincidem.");
+            setToast({ type: 'danger', message: "As senhas não coincidem." });
             return;
         }
 
@@ -29,30 +37,69 @@ export default function SignupPage() {
                 confirm_password: confirmPassword,
             });
 
-            console.log("Cadastro realizado com sucesso:", response.data);
+            setToast({
+                type: 'success',
+                message: 'Cadastro realizado! Redirecionando para verificação...'
+            });
 
-            // Redireciona para a tela de login após o cadastro
-            router.push("/VerifyCodePage");
+            // Redireciona após 2 segundos para mostrar o toast
+            setTimeout(() => {
+                router.push(`/VerifyCodePage?email=${encodeURIComponent(email)}`);
+            }, 2000);
+
         } catch (err) {
+            let errorMessage = "Erro inesperado. Tente novamente.";
             if (axios.isAxiosError(err)) {
-                // Erro relacionado ao Axios
-                setError(err.response?.data?.message || "Erro ao realizar cadastro. Tente novamente.");
-            } else {
-                // Outros tipos de erro
-                setError("Erro inesperado. Tente novamente.");
+                errorMessage = err.response?.data?.message || errorMessage;
             }
-            console.error("Erro ao realizar cadastro:", err);
+            setToast({ type: 'danger', message: errorMessage });
         }
-
     };
 
     return (
         <section className="bg-gray-50 dark:bg-gray-900">
+            {/* Toast Container */}
+            <div className="fixed top-4 right-4 z-50">
+                {toast && (
+                    toast.type === 'success' ? (
+                        <div className="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800" role="alert">
+                            <div className="inline-flex items-center justify-center shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                                </svg>
+                                <span className="sr-only">Check icon</span>
+                            </div>
+                            <div className="ms-3 text-sm font-normal">{toast.message}</div>
+                            <button type="button" onClick={() => setToast(null)} className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700">
+                                <span className="sr-only">Close</span>
+                                <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                </svg>
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800" role="alert">
+                            <div className="inline-flex items-center justify-center shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
+                                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z" />
+                                </svg>
+                                <span className="sr-only">Error icon</span>
+                            </div>
+                            <div className="ms-3 text-sm font-normal">{toast.message}</div>
+                            <button type="button" onClick={() => setToast(null)} className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700">
+                                <span className="sr-only">Close</span>
+                                <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                </svg>
+                            </button>
+                        </div>
+                    )
+                )}
+            </div>
+
+            {/* Conteúdo principal */}
             <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-                <a
-                    href="#"
-                    className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
-                >
+                <a href="#" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
                     <img className="mr-2" src="/ppscanner.svg" alt="logo" />
                 </a>
                 <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
@@ -62,10 +109,7 @@ export default function SignupPage() {
                         </h1>
                         <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                             <div>
-                                <label
-                                    htmlFor="email"
-                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                >
+                                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                     Seu e-mail
                                 </label>
                                 <input
@@ -80,10 +124,7 @@ export default function SignupPage() {
                                 />
                             </div>
                             <div>
-                                <label
-                                    htmlFor="password"
-                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                >
+                                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                     Senha
                                 </label>
                                 <input
@@ -98,10 +139,7 @@ export default function SignupPage() {
                                 />
                             </div>
                             <div>
-                                <label
-                                    htmlFor="confirm-password"
-                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                >
+                                <label htmlFor="confirm-password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                     Confirme a senha
                                 </label>
                                 <input
@@ -115,7 +153,6 @@ export default function SignupPage() {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                 />
                             </div>
-                            {error && <p className="text-sm text-red-500">{error}</p>}
                             <div className="flex items-start">
                                 <div className="flex items-center h-5">
                                     <input
@@ -127,15 +164,9 @@ export default function SignupPage() {
                                     />
                                 </div>
                                 <div className="ml-3 text-sm">
-                                    <label
-                                        htmlFor="terms"
-                                        className="font-light text-gray-500 dark:text-gray-300"
-                                    >
+                                    <label htmlFor="terms" className="font-light text-gray-500 dark:text-gray-300">
                                         Eu aceito os{" "}
-                                        <a
-                                            className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                                            href="#"
-                                        >
+                                        <a href="#" className="font-medium text-primary-600 hover:underline dark:text-primary-500">
                                             Termos e Condições
                                         </a>
                                     </label>
@@ -150,12 +181,9 @@ export default function SignupPage() {
                             <Link href="/login">
                                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                                     Já tem uma conta?{" "}
-                                    <a
-                                        href="#"
-                                        className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                                    >
+                                    <span className="font-medium text-primary-600 hover:underline dark:text-primary-500">
                                         Faça login aqui
-                                    </a>
+                                    </span>
                                 </p>
                             </Link>
                         </form>

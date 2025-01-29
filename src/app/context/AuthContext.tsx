@@ -16,7 +16,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 // Lista de rotas públicas compartilhada
-const publicRoutes = ["/login", "/signup", "/verify-code", "/not-found"];
+const publicRoutes = ["/login", "/signup", "/VerifyCodePage", "/not-found"];
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);

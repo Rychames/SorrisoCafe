@@ -1,100 +1,131 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
-import { apiUrl } from "@/app/utils/constantes"; // Importando a URL base
+import { useRouter, useSearchParams } from "next/navigation";
+import { apiUrl } from "@/app/utils/constantes";
 
 export default function VerifyCodePage() {
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    const [toast, setToast] = useState<{ type: 'success' | 'danger', message: string } | null>(null);
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // Configuração automática do email
+    useEffect(() => {
+        const emailParam = searchParams.get('email');
+        if (emailParam) {
+            setEmail(decodeURIComponent(emailParam));
+        } else {
+            setToast({ type: 'danger', message: "Email não encontrado. Faça o cadastro novamente." });
+            setTimeout(() => router.push("/signup"), 3000);
+        }
+    }, [searchParams, router]);
+
+    // Fecha o toast automaticamente
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => {
+                setToast(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError("");
-        setSuccess("");
+        setToast(null);
 
         try {
             const response = await axios.post(
-                `${apiUrl}user/register/verify-code/`, // Concatena a URL base com o endpoint
-                {
-                    email,
-                    code,
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
+                `${apiUrl}user/register/verify-code/`,
+                { email, code },
+                { headers: { "Content-Type": "application/json" } }
             );
 
             if (response.data.success) {
-                setSuccess("Email foi verificado com sucesso!");
-                setTimeout(() => {
-                    router.push("/login"); // Redireciona para a página de login
-                }, 2000);
+                setToast({ type: 'success', message: "Email verificado com sucesso! Redirecionando..." });
+                setTimeout(() => router.push("/login"), 2000);
             }
         } catch (err: any) {
-            setError(
-                err.response?.data?.message || "Erro ao verificar o código. Tente novamente."
-            );
+            setToast({
+                type: 'danger',
+                message: err.response?.data?.error?.[0] || 
+                        err.response?.data?.message || 
+                        "Erro ao verificar o código. Tente novamente."
+            });
         }
     };
 
     return (
         <section className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center">
+            {/* Toast Container */}
+            <div className="fixed top-4 right-4 z-50">
+                {toast && (
+                    toast.type === 'success' ? (
+                        <div className="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800" role="alert">
+                            <div className="inline-flex items-center justify-center shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                                </svg>
+                            </div>
+                            <div className="ms-3 text-sm font-normal">{toast.message}</div>
+                            <button type="button" onClick={() => setToast(null)} className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700">
+                                <span className="sr-only">Close</span>
+                                <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800" role="alert">
+                            <div className="inline-flex items-center justify-center shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
+                                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
+                                </svg>
+                            </div>
+                            <div className="ms-3 text-sm font-normal">{toast.message}</div>
+                            <button type="button" onClick={() => setToast(null)} className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700">
+                                <span className="sr-only">Close</span>
+                                <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    )
+                )}
+            </div>
+
+            {/* Formulário */}
             <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 dark:bg-gray-800 dark:border-gray-700">
                 <h1 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                    Verificar Código
+                    Verificação de Código
                 </h1>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label
-                            htmlFor="email"
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                            Email
-                        </label>
+                    <div className="hidden">
                         <input
-                            type="email"
-                            id="email"
-                            className="w-full p-2.5 bg-gray-50 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="name@example.com"
+                            type="hidden"
+                            name="email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
+                            readOnly
                         />
                     </div>
                     <div>
-                        <label
-                            htmlFor="code"
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                            Código
+                        <label htmlFor="code" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Insira o código recebido por email
                         </label>
                         <input
                             type="text"
                             id="code"
                             className="w-full p-2.5 bg-gray-50 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="Insira o código"
+                            placeholder="Código de 6 dígitos"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
                             required
+                            autoFocus
                         />
                     </div>
-                    {error && (
-                        <p className="text-sm text-red-500">
-                            {error}
-                        </p>
-                    )}
-                    {success && (
-                        <p className="text-sm text-green-500">
-                            {success}
-                        </p>
-                    )}
                     <button
                         type="submit"
                         className="w-full bg-green-500 text-white rounded-lg p-2.5 hover:bg-green-600"
