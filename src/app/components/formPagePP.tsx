@@ -4,6 +4,7 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { BASE_URL } from "@/app/utils/constantes";
 import {
     FaUser,
     FaTag,
@@ -58,51 +59,54 @@ export default function FormPagePP() {
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
-
+    
         const files = Array.from(e.target.files);
-        setImages(files);
-
-        const previews = files.map((file) => URL.createObjectURL(file));
-        setPreviewImages(previews);
+        const previews: string[] = [];
+        const base64Images: string[] = [];
+    
+        const convertToBase64 = (file: File) => {
+            return new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = (error) => reject(error);
+            });
+        };
+    
+        Promise.all(files.map(file => convertToBase64(file))).then(base64Array => {
+            setImages(files);
+            setPreviewImages(base64Array);
+        }).catch(error => console.error("Erro ao converter imagens:", error));
     };
+    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        const form = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            form.append(key, String(value));
-        });
-
-        images.forEach((image) => {
-            form.append("images", image); // "images" será a chave usada no backend
-        });
-
-        // Logando os dados enviados no console
-        console.log("Dados do Formulário:");
-        Object.entries(formData).forEach(([key, value]) => {
-            console.log(`${key}: ${value}`);
-        });
-
-        console.log("Imagens:");
-        images.forEach((image, index) => {
-            console.log(`Imagem ${index + 1}:`, image.name);
-        });
-
+    
+        const imagesBase64 = await Promise.all(
+            images.map(async (image) => {
+                const reader = new FileReader();
+                return new Promise<string>((resolve, reject) => {
+                    reader.readAsDataURL(image);
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = (error) => reject(error);
+                });
+            })
+        );
+    
+        const payload = {
+            ...formData,
+            images: imagesBase64, // Envia as imagens como Base64
+        };
+    
         try {
-            const response = await axios.post(
-                "http://10.0.0.173:8000/api/inventory/",
-                form,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                }
-            );
-
+            const response = await axios.post(`${BASE_URL}api/inventory/`, payload, {
+                headers: { "Content-Type": "application/json" },
+            });
+    
             console.log("Resposta do Servidor:", response.data);
-
-            if (response.status === 200) {
+    
+            if (response.status === 201) {
                 Swal.fire("Sucesso", "Produto cadastrado com sucesso!", "success");
                 router.push("/produtos");
             }
@@ -111,6 +115,7 @@ export default function FormPagePP() {
             Swal.fire("Erro", "Falha ao cadastrar o produto.", "error");
         }
     };
+    
 
 
     return (

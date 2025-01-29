@@ -1,35 +1,46 @@
+// app/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest) {
-  const token = req.cookies.get("authToken");
-  const { pathname } = req.nextUrl;
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get("authToken")?.value;
+  const { pathname } = request.nextUrl;
 
-  // Lista de rotas válidas
-  const validRoutes = ["/", "/login", "/add-product", "/inventory", "/not-found"];
+  // Rotas válidas do sistema
+  const validRoutes = [
+    "/",
+    "/login",
+    "/add-product",
+    "/inventory",
+    "/not-found"
+  ];
 
-  // Verifica se a rota atual é válida
-  if (!validRoutes.includes(pathname)) {
-    return NextResponse.redirect(new URL("/not-found", req.url)); // Redireciona para a página 404
+  // Rotas públicas (não requerem autenticação)
+  const publicRoutes = ["/login", "/not-found"];
+
+  // Verifica se a rota é válida
+  const isRouteValid = validRoutes.some(route => 
+    pathname === route || pathname.startsWith(route + '/')
+  );
+
+  // Redireciona para not-found se rota não existe
+  if (!isRouteValid) {
+    return NextResponse.redirect(new URL("/not-found", request.url));
   }
 
-  // Permitir o acesso à página de login sem autenticação
-  if (pathname === "/login") {
-    if (token) {
-      // Redireciona para a página inicial se o usuário já estiver logado
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    return NextResponse.next();
+  // Redireciona usuários logados que tentam acessar login
+  if (pathname === "/login" && token) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Bloquear outras rotas caso não esteja logado
-  if (!token && pathname !== "/not-found") {
-    return NextResponse.redirect(new URL("/login", req.url));
+  // Bloqueia acesso a rotas privadas sem token
+  if (!publicRoutes.includes(pathname) && !token) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|static|favicon.ico).*)"], // Ignora rotas públicas
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

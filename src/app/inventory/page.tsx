@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import axios from "axios";
+import { BASE_URL } from "@/app/utils/constantes";
 
-// Definir o tipo para o item do inventário
 interface InventoryItem {
   id: number;
   name: string;
@@ -12,29 +13,34 @@ interface InventoryItem {
   description: string;
   quantity: number;
   qr_code: string;
-  images: string[]; // Array de URLs de imagens
+  images: string[] | null; // Agora aceita null para evitar erros
 }
 
 export default function InventoryPage() {
-  const [items, setItems] = useState<InventoryItem[]>([]); // Todos os itens
-  const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]); // Itens filtrados
-  const [categoryFilter, setCategoryFilter] = useState(""); // Filtro de categoria
-  const [searchTerm, setSearchTerm] = useState(""); // Termo de pesquisa
-  const [loading, setLoading] = useState(true); // Estado de carregamento
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Carregar itens da API ao montar o componente
   useEffect(() => {
     const fetchItems = async () => {
+      console.log("📡 Buscando itens do inventário...");
       try {
-        const response = await fetch(
-          "https://ppscannerbackend-production.up.railway.app/api/inventory"
-        );
-        const data = await response.json();
-        setItems(data);
-        setFilteredItems(data); // Inicialmente, todos os itens são exibidos
+        const response = await axios.get(`${BASE_URL}api/inventory`); 
+        console.log("✅ Dados recebidos da API:", response.data);
+
+        // Garantindo que as imagens sejam arrays válidos
+        const formattedData = response.data.map((item: InventoryItem) => ({
+          ...item,
+          images: item.images ? item.images : [], // Se images for null, converte para []
+        }));
+
+        setItems(formattedData);
+        setFilteredItems(formattedData);
       } catch (error) {
-        console.error("Erro ao carregar os itens:", error);
+        console.error("❌ Erro ao carregar os itens:", error);
       } finally {
         setLoading(false);
       }
@@ -42,21 +48,18 @@ export default function InventoryPage() {
     fetchItems();
   }, []);
 
-  // Lidar com mudança no filtro de categoria
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const category = e.target.value;
     setCategoryFilter(category);
     applyFilters(searchTerm, category);
   };
 
-  // Lidar com a pesquisa
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setSearchTerm(term);
     applyFilters(term, categoryFilter);
   };
 
-  // Aplicar filtros (categoria e pesquisa)
   const applyFilters = (term: string, category: string) => {
     let filtered = items;
 
@@ -73,20 +76,16 @@ export default function InventoryPage() {
     setFilteredItems(filtered);
   };
 
-  // Lidar com exclusão de item
   const handleDelete = async (id: number) => {
+    console.log(`🗑️ Tentando excluir o item ID: ${id}`);
     try {
-      const response = await fetch(
-        `https://ppscannerbackend-production.up.railway.app/api/inventory/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (!response.ok) throw new Error("Erro ao excluir o produto.");
+      const response = await axios.delete(`${BASE_URL}api/inventory/${id}`);
+      console.log("✅ Produto excluído com sucesso:", response.data);
+
       setItems((prev) => prev.filter((item) => item.id !== id));
       setFilteredItems((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
-      console.error("Erro ao excluir o produto:", error);
+      console.error("❌ Erro ao excluir o produto:", error);
     }
   };
 
@@ -145,12 +144,12 @@ export default function InventoryPage() {
                   onClick={() => router.push(`/product/${item.id}`)}
                 >
                   <h2 className="text-xl font-bold">{item.name}</h2>
-                  
+
                   {/* Exibindo imagem principal */}
                   {item.images && item.images.length > 0 ? (
                     <div>
                       <img
-                        src={item.images[0]}
+                        src={`data:image/png;base64,${item.images[0]}`}
                         alt={`${item.name} image`}
                         className="w-full h-48 object-cover rounded-lg mb-4"
                       />

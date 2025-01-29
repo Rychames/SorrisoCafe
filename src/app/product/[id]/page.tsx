@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react"; // Corrigido para usar QRCodeSVG
-
+import { BASE_URL, apiUrl } from "@/app/utils/constantes";
 
 export default function ProductDetails() {
   const params = useParams(); // Acessa os parâmetros de URL
@@ -14,7 +14,7 @@ export default function ProductDetails() {
     const fetchProduct = async () => {
       try {
         if (!params.id) return; // Verifica se o ID existe
-        const response = await fetch(`https://ppscannerbackend-production.up.railway.app/api/inventory/detail/${params.id}`);
+        const response = await fetch(`${BASE_URL}api/inventory/detail/${params.id}`);
         if (!response.ok) {
           throw new Error("Erro ao buscar o produto");
         }
