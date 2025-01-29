@@ -42,7 +42,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setToken(accessToken);
       localStorage.setItem("authToken", accessToken);
 
-      // Busca dados do usuário após login
       const userResponse = await axios.get(`${apiUrl}user/`, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
@@ -77,7 +76,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     initializeAuth();
-  }, [logout, pathname]);
+  }, [logout]);
+
+  useEffect(() => {
+    if (!loading) {
+      const isPublicPath = pathname === "/login";
+      
+      // Redireciona usuários não autenticados tentando acessar rotas privadas
+      if (!user && !isPublicPath) {
+        router.push("/login");
+      }
+      
+      // Redireciona usuários autenticados tentando acessar a tela de login
+      if (user && isPublicPath) {
+        router.push("/");
+      }
+    }
+  }, [user, loading, pathname, router]);
 
   if (loading) {
     return null;
