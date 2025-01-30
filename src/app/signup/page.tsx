@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiUrl } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constantes";
 
 export default function SignupPage() {
     const [email, setEmail] = useState("");
@@ -30,7 +30,7 @@ export default function SignupPage() {
         }
 
         try {
-            const response = await axios.post(`${apiUrl}user/register/`, {
+            const response = await axios.post(`${BASE_URL}user/register/`, {
                 email: email.toLowerCase().trim(),
                 password,
                 confirm_password: confirmPassword

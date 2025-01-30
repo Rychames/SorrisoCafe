@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
-import { apiUrl } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constantes";
 
 export default function VerifyCodePage() {
     const [email, setEmail] = useState("");
@@ -50,7 +50,7 @@ export default function VerifyCodePage() {
         }
 
         try {
-            const response = await axios.post(`${apiUrl}user/register/verify-code/`, {
+            const response = await axios.post(`${BASE_URL}user/register/verify-code/`, {
                 email,
                 code
             });

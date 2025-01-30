@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import axios from "axios";
-import { apiUrl } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constantes";
 
 type AuthContextType = {
   user: any;
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      const response = await axios.post(`${apiUrl}user/login/`, {
+      const response = await axios.post(`${BASE_URL}user/login/`, {
         email,
         password,
       });
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setToken(accessToken);
       localStorage.setItem("authToken", accessToken);
 
-      const userResponse = await axios.get(`${apiUrl}user/`, {
+      const userResponse = await axios.get(`${BASE_URL}user/`, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
       
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (storedToken) {
         try {
-          const userResponse = await axios.get(`${apiUrl}user/`, {
+          const userResponse = await axios.get(`${BASE_URL}user/`, {
             headers: { Authorization: `Bearer ${storedToken}` }
           });
           

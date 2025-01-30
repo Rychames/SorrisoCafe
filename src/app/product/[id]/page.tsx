@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react"; // Corrigido para usar QRCodeSVG
-import { BASE_URL, apiUrl } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constantes";
 
 export default function ProductDetails() {
   const params = useParams(); // Acessa os parâmetros de URL
