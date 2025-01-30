@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BASE_URL } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constants";
 
 export default function SignupPage() {
     const [email, setEmail] = useState("");

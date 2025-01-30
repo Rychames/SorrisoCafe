@@ -17,11 +17,11 @@ import {
     FaPlus,
 } from "react-icons/fa";
 import { Company, SendFormProduct } from "@/app/models";
-import { BASE_URL } from "../utils/constantes";
+import { BASE_URL } from "@/app/utils";
 
 interface FormPageOthersProps {
-    company: Company | undefined;
-    companies: Company[] | undefined;
+    company: Company;
+    companies: Company[];
   }
 
 export default function FormPageOthers({company, companies}: FormPageOthersProps) {
@@ -85,43 +85,20 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
         });
 
         images.forEach((image) => {
-            form.append("images", image); // "images" será a chave usada no backend
+            form.append("images", image);
         });
         
-        form.append("delivery_man_signature", images[0])
-        //form.append("received_company", company.id)
-        //form.append("current_company", company.id)
-        
-        // Logando os dados enviados no console
-        console.log("Dados do Formulário:");
-        Object.entries(formData).forEach(([key, value]) => {
-            console.log(`${key}: ${value}`);
-        });
-
-        console.log("Imagens:");
-        images.forEach((image, index) => {
-            console.log(`Imagem ${index + 1}:`, image.name);
-        });
-
-        console.log(form.get('received_company'))
+        form.append("delivery_man_signature", images[0]) // -> campo onde o documento deve ser encaminhado
 
         try {
             const response = await axios.post(
-                `${BASE_URL}api/products/`,
+                'api/products/',
                 form,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                    },
-                }
             );
-
-            console.log("Resposta do Servidor:", response.data);
 
             if (response.data['success'] == true) {
                 Swal.fire("Sucesso", "Produto cadastrado com sucesso!", "success");
-                router.push("/produtos");
+                router.push("/inventory");
             }
         } catch (error) {
             console.error("Erro ao enviar o formulário:", error);

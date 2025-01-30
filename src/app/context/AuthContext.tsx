@@ -1,10 +1,10 @@
-// context/AuthContext.tsx
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import axios from "axios";
-import { BASE_URL } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constants";
+import { UserModel } from "@/app/models";
 
 type AuthContextType = {
   user: any;
@@ -14,27 +14,28 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-// Lista de rotas públicas compartilhada
 const publicRoutes = ["/login", "/signup", "/VerifyCodePage", "/not-found"];
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserModel | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
+  axios.defaults.baseURL = BASE_URL;
+
   const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("authToken");
+    delete axios.defaults.headers.common['Authorization'];
     router.push("/login");
   }, [router]);
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      const response = await axios.post(`${BASE_URL}user/login/`, {
+      const response = await axios.post('user/login/', {
         email,
         password,
       });
@@ -42,14 +43,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { data } = response.data;
       const accessToken = data.access;
 
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      
       setToken(accessToken);
       localStorage.setItem("authToken", accessToken);
 
-      const userResponse = await axios.get(`${BASE_URL}user/`, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      
-      setUser(userResponse.data);
+      const userResponse = await axios.get('user/profile/');
+      setUser(userResponse.data['data']);
       router.push("/");
     } catch (error: any) {
       throw new Error(
@@ -64,16 +64,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (storedToken) {
         try {
-          const userResponse = await axios.get(`${BASE_URL}user/`, {
-            headers: { Authorization: `Bearer ${storedToken}` }
-          });
+          axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+          const userResponse = await axios.get('user/profile/');
           
-          setUser(userResponse.data);
+          setUser(userResponse.data['data']);
           setToken(storedToken);
         } catch (error) {
           console.error("Erro na verificação do token:", error);
           logout();
         }
+      } else {
+        delete axios.defaults.headers.common['Authorization'];
       }
       setLoading(false);
     };
@@ -85,12 +86,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!loading) {
       const isPublicPath = publicRoutes.includes(pathname);
       
-      // Redireciona usuários não autenticados tentando acessar rotas privadas
       if (!user && !isPublicPath) {
         router.push("/login");
       }
       
-      // Redireciona usuários autenticados tentando acessar rotas públicas
       if (user && isPublicPath) {
         router.push("/");
       }

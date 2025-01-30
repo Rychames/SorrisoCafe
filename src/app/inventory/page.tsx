@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 import axios from "axios";
-import { BASE_URL } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constants";
 import { Product } from "@/app/models";
 
 interface InventoryItem {
@@ -29,18 +29,13 @@ export default function InventoryPage() {
     const fetchItems = async () => {
       console.log("📡 Buscando itens do inventário...");
       try {
-        const response = await axios.get(`${BASE_URL}api/products/`); 
-        console.log("✅ Dados recebidos da API:", response.data['data']);
+        const response = await axios.get('api/products/'); 
+        console.log("✅ Dados recebidos da API:", response.data);
+        if (response.data['data']){
+          setItems(response.data['data']);
+          setFilteredItems(response.data['data']);
+        }
 
-        // Garantindo que as imagens sejam arrays válidos
-        /* Comentado apenas para testes
-        const formattedData = response.data.map((item: Product) => ({
-          ...item,
-          images: item.images ? item.images : [], // Se images for null, converte para []
-        }));
-        */
-        setItems(response.data['data']);
-        setFilteredItems(response.data['data']);
       } catch (error) {
         console.error("❌ Erro ao carregar os itens:", error);
       } finally {
@@ -81,7 +76,7 @@ export default function InventoryPage() {
   const handleDelete = async (id: number) => {
     console.log(`🗑️ Tentando excluir o item ID: ${id}`);
     try {
-      const response = await axios.delete(`${BASE_URL}api/inventory/${id}`);
+      const response = await axios.delete(`api/products/${id}`);
       console.log("✅ Produto excluído com sucesso:", response.data);
 
       setItems((prev) => prev.filter((item) => item.id !== id));
@@ -139,7 +134,11 @@ export default function InventoryPage() {
 
             {/* Lista de Itens */}
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredItems.map((item) => (
+              {filteredItems.length === 0 ? (
+                <p>Não há itens.</p>
+              ) : (
+                // Conteúdo para quando filteredItems tiver itens
+                filteredItems.map((item) => (
                 <li
                   key={item.id}
                   className="p-4 bg-white shadow rounded-lg relative"
@@ -169,22 +168,23 @@ export default function InventoryPage() {
                   <p>Quantidade: {item.quantity}</p>
 
                   {/* Botões de Ação */}
-                  <div className="absolute top-4 right-4 flex space-x-2">
+                  <div className="absolute top-4 right-4 flex space-x-2 z-[999]">
                     <button
-                      className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
+                      className="bg-green-500 text-white p-2 rounded hover:bg-green-600 z-[99999]"
                       onClick={() => router.push(`/product/edit/${item.id}`)}
                     >
                       <FaEdit />
                     </button>
                     <button
-                      className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
+                      className="bg-red-500 text-white p-2 rounded hover:bg-red-600 z-[99999]"
                       onClick={() => handleDelete(item.id)}
                     >
                       <FaTrash />
                     </button>
                   </div>
                 </li>
-              ))}
+                ))
+              )}
             </ul>
           </div>
         </div>

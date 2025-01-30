@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import FormPPInventory from "../components/formPagePP";
 import FormOtherCompaniesInventory from "../components/formPageOthers";
-import { BASE_URL } from "../utils/constantes";
+import { BASE_URL } from "../utils/constants";
 import { Company } from "@/app/models";
 
 export default function AddProduct() {
@@ -16,17 +16,17 @@ export default function AddProduct() {
 
     const fetchCompanies = async () => {
         try {
-            const response = await fetch(`${BASE_URL}api/companies/`);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+            const response = await axios.get('api/companies/');
+
+            if (response.data['success'] == true) {
+                setCompanies(response.data['data']);
+                setIsLoading(false);
             }
-            const data = await response.json();
-            setCompanies(data['data']);
-            setIsLoading(false);
         } catch (error) {
             console.error('Error fetching companies:', error);
             setIsLoading(false);
         }
+
     };
 
     useEffect(() => {
@@ -75,7 +75,9 @@ export default function AddProduct() {
 
                 {/* Renderização do Formulário */}
                 <div className="transition-all duration-300 ease-in-out">
-                    {inventoryType && <FormOtherCompaniesInventory company={companySelection} companies={companies}/>}
+                    {companySelection && 
+                        <FormOtherCompaniesInventory company={companySelection} companies={companies}/>
+                    }
                 </div>
             </div>
         </div>
