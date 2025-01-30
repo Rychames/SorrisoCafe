@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import axios from "axios";
-import FormPPInventory from "../components/formPagePP";
 import FormOtherCompaniesInventory from "../components/formPageOthers";
 import { BASE_URL } from "../utils/constantes";
 import { Company } from "@/app/models";
@@ -16,15 +15,19 @@ export default function AddProduct() {
 
     const fetchCompanies = async () => {
         try {
-            const response = await fetch(`${BASE_URL}api/companies/`);
-            if (!response.ok) {
+            const response = await axios.get(`${BASE_URL}api/companies/`, {
+                validateStatus: () => true // Permite tratar manualmente os status
+            });
+
+            if (response.status < 200 || response.status >= 300) {
                 throw new Error('Network response was not ok');
             }
-            const data = await response.json();
-            setCompanies(data['data']);
+
+            setCompanies(response.data.data);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching companies:', error);
+            Swal.fire('Erro!', 'Não foi possível carregar as empresas.', 'error');
             setIsLoading(false);
         }
     };
@@ -34,17 +37,20 @@ export default function AddProduct() {
     }, []);
 
     const handleInventoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setInventoryType(e.target.value);
-        const selectedCompany = companies.find(company => company.id === parseInt(e.target.value));
-    
+        const selectedValue = e.target.value;
+        setInventoryType(selectedValue);
+        
+        const selectedCompany = companies.find(company => 
+            company.id === parseInt(selectedValue)
+        );
+
         if (selectedCompany) {
             setCompanySelection(selectedCompany);
         }
-        console.log(`Empresa selecionada ${e.target.value}`)
     };
 
     if (isLoading) {
-        return <div>Loading companies...</div>;
+        return <div>Carregando empresas...</div>;
     }
 
     return (
@@ -54,7 +60,6 @@ export default function AddProduct() {
                     Cadastrar Produto
                 </h1>
 
-                {/* Seletor de Tipo de Inventário */}
                 <div className="mb-8">
                     <label className="block text-gray-700 font-semibold mb-3 text-lg">
                         Tipo de Inventário
@@ -73,9 +78,13 @@ export default function AddProduct() {
                     </select>
                 </div>
 
-                {/* Renderização do Formulário */}
                 <div className="transition-all duration-300 ease-in-out">
-                    {inventoryType && <FormOtherCompaniesInventory company={companySelection} companies={companies}/>}
+                    {inventoryType && companySelection && (
+                        <FormOtherCompaniesInventory 
+                            company={companySelection} 
+                            companies={companies}
+                        />
+                    )}
                 </div>
             </div>
         </div>

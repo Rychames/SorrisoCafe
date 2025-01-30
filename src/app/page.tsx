@@ -3,6 +3,7 @@ import {
   PlusCircleIcon,
   QrCodeIcon,
   ClipboardDocumentListIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/solid";
 
 
@@ -60,6 +61,18 @@ export default function Home() {
               <p className="text-gray-600">
                 Veja informações completas dos itens registrados, tanto os que
                 permanecem na empresa quanto os que foram enviados.
+              </p>
+            </div>
+          </Link>
+
+          <Link href="/add-companies">
+            <div className="bg-primary-100 hover:bg-primary-200 shadow-lg hover:shadow-xl p-6 rounded-xl cursor-pointer transition transform hover:-translate-y-2">
+              <BuildingOfficeIcon className="h-14 w-14 text-primary-700 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2 text-primary-800">
+                Adicione uma nova empresa
+              </h3>
+              <p className="text-gray-600">
+                Cadastre uma nova empresa para registrar um novo produto!
               </p>
             </div>
           </Link>

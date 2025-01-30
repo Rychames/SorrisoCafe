@@ -14,6 +14,7 @@ export function middleware(request: NextRequest) {
     "/",
     "/login",
     "/add-product",
+    "/add-companies",
     "/inventory",
     "/not-found",
     "/signup",
