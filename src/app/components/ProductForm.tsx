@@ -1,3 +1,4 @@
+// app/components/ProductForm.tsx
 "use client";
 
 import { useState } from "react";
@@ -19,12 +20,11 @@ import {
 import { Company, SendFormProduct } from "@/app/models";
 import { BASE_URL } from "../utils/constantes";
 
-interface FormPageOthersProps {
-    company: Company;
-    companies: Company[];
-  }
+interface ProductFormProps {
+    company: Company; // A empresa passada deve ser recebida aqui
+}
 
-export default function FormPageOthers({company, companies}: FormPageOthersProps) {
+const ProductForm = ({ company }: ProductFormProps) => {
     const [formData, setFormData] = useState<SendFormProduct>({
         name: '',
         category: '',
@@ -32,13 +32,13 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
         company_brand: '',
         description: '',
         quantity: 0,
-        size: '', 
+        size: '',
         lot: false,
         sector: '',
         delivered_by: '',
         delivery_man_signature: null,
-        received_company: company.id,
-        current_company: company.id,
+        received_company: company.id, // Garantir que o id da empresa está correto
+        current_company: company.id,  // Garantir que o id da empresa está correto
         images: null,
     });
 
@@ -49,9 +49,7 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
     const categories = ["Eletrônicos", "Roupas", "Alimentos"]; // Exemplo de categorias
 
     const handleInputChange = (
-        e: React.ChangeEvent<
-            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
         const { name, value, type } = e.target;
 
@@ -87,23 +85,8 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
         images.forEach((image) => {
             form.append("images", image); // "images" será a chave usada no backend
         });
-        
-        form.append("delivery_man_signature", images[0])
-        //form.append("received_company", company.id)
-        //form.append("current_company", company.id)
-        
-        // Logando os dados enviados no console
-        console.log("Dados do Formulário:");
-        Object.entries(formData).forEach(([key, value]) => {
-            console.log(`${key}: ${value}`);
-        });
 
-        console.log("Imagens:");
-        images.forEach((image, index) => {
-            console.log(`Imagem ${index + 1}:`, image.name);
-        });
-
-        console.log(form.get('received_company'))
+        form.append("delivery_man_signature", images[0]);
 
         try {
             const response = await axios.post(
@@ -117,11 +100,9 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
                 }
             );
 
-            console.log("Resposta do Servidor:", response.data);
-
-            if (response.data['success'] == true) {
+            if (response.data['success'] === true) {
                 Swal.fire("Sucesso", "Produto cadastrado com sucesso!", "success");
-                router.push("/inventory");
+                router.push("/inventory");  // Redirecionando para a página de inventário após sucesso
             }
         } catch (error) {
             console.error("Erro ao enviar o formulário:", error);
@@ -129,12 +110,11 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
         }
     };
 
-
     return (
         <div className="p-6 md:p-12 bg-gray-100 min-h-screen relative z-10">
             <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg p-8">
                 <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">
-                    {company.name} - Inventário que aparece a Wnet
+                    {company.name} - Inventário
                 </h1>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Nome e Categoria */}
@@ -237,8 +217,6 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
                         </div>
                     </div>
 
-                 
-
                     {/* CheckBox */}
                     <div className="flex items-center space-x-3">
                         <FaCheckSquare className="text-green-500" />
@@ -252,20 +230,6 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
                         <label htmlFor="unitOrBox" className="text-gray-700">
                             Por Caixa (desmarcar para Unidade)
                         </label>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                            <FaClipboard className="text-green-500" />
-                            <input
-                                name="sector"
-                                type="text"
-                                placeholder="Qual setor o produto vai ficar?"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </div>
                     </div>
 
                     {/* Entrega */}
@@ -338,4 +302,6 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
             </div>
         </div>
     );
-}
+};
+
+export default ProductForm;
