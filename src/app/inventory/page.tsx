@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 import axios from "axios";
 import { BASE_URL } from "@/app/utils/constantes";
+import { Product } from "@/app/models";
 
 interface InventoryItem {
   id: number;
@@ -17,8 +18,8 @@ interface InventoryItem {
 }
 
 export default function InventoryPage() {
-  const [items, setItems] = useState<InventoryItem[]>([]);
-  const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]);
+  const [items, setItems] = useState<Product[]>([]);
+  const [filteredItems, setFilteredItems] = useState<Product[]>([]);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -28,17 +29,18 @@ export default function InventoryPage() {
     const fetchItems = async () => {
       console.log("📡 Buscando itens do inventário...");
       try {
-        const response = await axios.get(`${BASE_URL}api/inventory`); 
-        console.log("✅ Dados recebidos da API:", response.data);
+        const response = await axios.get(`${BASE_URL}api/products/`); 
+        console.log("✅ Dados recebidos da API:", response.data['data']);
 
         // Garantindo que as imagens sejam arrays válidos
-        const formattedData = response.data.map((item: InventoryItem) => ({
+        /* Comentado apenas para testes
+        const formattedData = response.data.map((item: Product) => ({
           ...item,
           images: item.images ? item.images : [], // Se images for null, converte para []
         }));
-
-        setItems(formattedData);
-        setFilteredItems(formattedData);
+        */
+        setItems(response.data['data']);
+        setFilteredItems(response.data['data']);
       } catch (error) {
         console.error("❌ Erro ao carregar os itens:", error);
       } finally {
@@ -149,7 +151,7 @@ export default function InventoryPage() {
                   {item.images && item.images.length > 0 ? (
                     <div>
                       <img
-                        src={`data:image/png;base64,${item.images[0]}`}
+                        src={item.images[0].image}
                         alt={`${item.name} image`}
                         className="w-full h-48 object-cover rounded-lg mb-4"
                       />

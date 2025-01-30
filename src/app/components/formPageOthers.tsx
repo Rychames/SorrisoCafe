@@ -16,20 +16,30 @@ import {
     FaImage,
     FaPlus,
 } from "react-icons/fa";
+import { Company, SendFormProduct } from "@/app/models";
+import { BASE_URL } from "../utils/constantes";
 
-export default function FormPageOthers() {
-    const [formData, setFormData] = useState({
-        name: "",
-        category: "",
-        model: "",
-        brand: "",
-        description: "",
-        quantity: "",
-        size: "",
-        unitOrBox: false,
-        deliveredBy: "",
-        receivedBy: "",
-        deliveryTime: "",
+interface FormPageOthersProps {
+    company: Company | undefined;
+    companies: Company[] | undefined;
+  }
+
+export default function FormPageOthers({company, companies}: FormPageOthersProps) {
+    const [formData, setFormData] = useState<SendFormProduct>({
+        name: '',
+        category: '',
+        model: '',
+        company_brand: '',
+        description: '',
+        quantity: 0,
+        size: '', 
+        lot: false,
+        sector: '',
+        delivered_by: '',
+        delivery_man_signature: null,
+        received_company: company.id,
+        current_company: company.id,
+        images: null,
     });
 
     const [images, setImages] = useState<File[]>([]);
@@ -77,7 +87,11 @@ export default function FormPageOthers() {
         images.forEach((image) => {
             form.append("images", image); // "images" será a chave usada no backend
         });
-
+        
+        form.append("delivery_man_signature", images[0])
+        //form.append("received_company", company.id)
+        //form.append("current_company", company.id)
+        
         // Logando os dados enviados no console
         console.log("Dados do Formulário:");
         Object.entries(formData).forEach(([key, value]) => {
@@ -89,20 +103,23 @@ export default function FormPageOthers() {
             console.log(`Imagem ${index + 1}:`, image.name);
         });
 
+        console.log(form.get('received_company'))
+
         try {
             const response = await axios.post(
-                "http://10.0.0.173:8000/api/inventory/",
+                `${BASE_URL}api/products/`,
                 form,
                 {
                     headers: {
                         "Content-Type": "multipart/form-data",
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                     },
                 }
             );
 
             console.log("Resposta do Servidor:", response.data);
 
-            if (response.status === 200) {
+            if (response.data['success'] == true) {
                 Swal.fire("Sucesso", "Produto cadastrado com sucesso!", "success");
                 router.push("/produtos");
             }
@@ -117,7 +134,7 @@ export default function FormPageOthers() {
         <div className="p-6 md:p-12 bg-gray-100 min-h-screen relative z-10">
             <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg p-8">
                 <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">
-                    Inventário outras Empresas
+                    {company.name} - Inventário
                 </h1>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Nome e Categoria */}
@@ -167,7 +184,7 @@ export default function FormPageOthers() {
                         <div className="flex items-center space-x-3">
                             <FaBox className="text-green-500" />
                             <input
-                                name="brand"
+                                name="company_brand"
                                 type="text"
                                 placeholder="Marca"
                                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
@@ -213,18 +230,20 @@ export default function FormPageOthers() {
                                 required
                             >
                                 <option value="">Selecione o Tamanho</option>
-                                <option value="P">P</option>
+                                <option value="S">P</option>
                                 <option value="M">M</option>
                                 <option value="G">G</option>
                             </select>
                         </div>
                     </div>
 
+                 
+
                     {/* CheckBox */}
                     <div className="flex items-center space-x-3">
                         <FaCheckSquare className="text-green-500" />
                         <input
-                            name="unitOrBox"
+                            name="lot"
                             type="checkbox"
                             id="unitOrBox"
                             className="h-5 w-5 text-green-500 border-gray-300 rounded focus:ring-green-300"
@@ -235,39 +254,31 @@ export default function FormPageOthers() {
                         </label>
                     </div>
 
+                    <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                            <FaClipboard className="text-green-500" />
+                            <input
+                                name="sector"
+                                type="text"
+                                placeholder="Qual setor o produto vai ficar?"
+                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+                    </div>
+
                     {/* Entrega */}
                     <div className="space-y-4">
                         <div className="flex items-center space-x-3">
                             <FaUser className="text-green-500" />
                             <input
-                                name="deliveredBy"
+                                name="delivered_by"
                                 type="text"
                                 placeholder="Entregue Por"
                                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
                                 onChange={handleInputChange}
                                 required
-                            />
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <FaUser className="text-green-500" />
-                            <input
-                                name="receivedBy"
-                                type="text"
-                                placeholder="Recebido Por"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <FaClock className="text-green-500" />
-                            <input
-                                name="deliveryTime"
-                                type="text"
-                                placeholder="Horário de Entrega"
-                                value={formData.deliveryTime}
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
-                                onChange={handleInputChange}
                             />
                         </div>
                     </div>
