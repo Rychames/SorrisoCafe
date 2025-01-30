@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import axios from "axios";
-import FormOtherCompaniesInventory from "../components/formPageOthers";
+import FormOtherCompaniesInventory from "@/app/components/ProductForm";
 import { BASE_URL } from "@/app/utils/";
 import { Company } from "@/app/models";
 
