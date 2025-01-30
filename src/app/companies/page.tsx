@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
-import { BASE_URL } from '@/app/utils/constantes';
+import { BASE_URL } from '@/app/utils/constants';
 import { Company } from '@/app/models';
 
 export default function CompaniesPage() {

@@ -18,7 +18,7 @@ import {
     FaPlus,
 } from "react-icons/fa";
 import { Company, SendFormProduct } from "@/app/models";
-import { BASE_URL } from "../utils/constantes";
+import { BASE_URL } from "../utils/constants";
 
 interface ProductFormProps {
     company: Company; // A empresa passada deve ser recebida aqui

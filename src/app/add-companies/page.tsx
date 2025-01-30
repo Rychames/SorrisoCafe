@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { BASE_URL } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/";
 
 export default function AddCompanyPage() {
     const router = useRouter();

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import ProductForm from "@/app/components/ProductForm";
-import { BASE_URL } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constants";
 import { Company } from "@/app/models";
 
 export default function AddProductPage() {

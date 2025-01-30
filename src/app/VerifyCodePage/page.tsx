@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BASE_URL } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constants";
 
 export default function VerifyCodePage() {
     const [email, setEmail] = useState("");

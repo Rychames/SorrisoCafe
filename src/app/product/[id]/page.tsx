@@ -3,38 +3,33 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react"; // Corrigido para usar QRCodeSVG
-import { BASE_URL } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constants";
 import { Product } from "@/app/models";
+import axios from "axios";
 
 export default function ProductDetails() {
-  const params = useParams(); // Acessa os parâmetros de URL
+  const params = useParams(); 
   const [product, setProduct] = useState<Product>();
 
-  // Função para buscar o produto usando o ID
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        if (!params.id) return; // Verifica se o ID existe
-        const response = await fetch(`${BASE_URL}api/products/${params.id}/`);
-        if (!response.ok) {
-          throw new Error("Erro ao buscar o produto");
-        }
-        const data = await response.json();
-        setProduct(data['data']); // Define os dados do produto
+        if (!params.id) return;
+        const response = await axios.get(`api/products/${params.id}/`);
+
+        setProduct(response.data['data'])
       } catch (error) {
-        console.error("Erro ao buscar o produto:", error);
+          console.error("Erro ao buscar o produto:", error);
       }
     };
 
     fetchProduct();
   }, [params.id]);
 
-  // Função para imprimir a página
   const handlePrint = () => {
-    window.print(); // Chama a função de impressão do navegador
+    window.print(); 
   };
 
-  // Carregamento de dados
   if (!product) {
     return <div className="flex items-center justify-center min-h-screen text-gray-600">Carregando...</div>;
   }

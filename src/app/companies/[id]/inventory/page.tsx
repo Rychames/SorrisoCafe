@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import { BASE_URL } from "@/app/utils/constantes";
+import { BASE_URL } from "@/app/utils/constants";
 import { Product } from "@/app/models";
 
 export default function InventoryPage() {
