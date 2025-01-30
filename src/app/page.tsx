@@ -24,15 +24,15 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
           {/* Adicionar Produtos */}
-          <Link href="/add-product">
+
+          <Link href="/add-companies">
             <div className="bg-primary-100 hover:bg-primary-200 shadow-lg hover:shadow-xl p-6 rounded-xl cursor-pointer transition transform hover:-translate-y-2">
-              <PlusCircleIcon className="h-14 w-14 text-primary-700 mx-auto mb-4" />
+              <BuildingOfficeIcon className="h-14 w-14 text-primary-700 mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2 text-primary-800">
-                Adicione Produtos
+                Adicione uma nova empresa
               </h3>
               <p className="text-gray-600">
-                Cadastre móveis, materiais de escritório e muito mais em
-                categorias organizadas para o registro no escritório.
+                Cadastre uma nova empresa para registrar um novo produto!
               </p>
             </div>
           </Link>
@@ -65,17 +65,7 @@ export default function Home() {
             </div>
           </Link>
 
-          <Link href="/add-companies">
-            <div className="bg-primary-100 hover:bg-primary-200 shadow-lg hover:shadow-xl p-6 rounded-xl cursor-pointer transition transform hover:-translate-y-2">
-              <BuildingOfficeIcon className="h-14 w-14 text-primary-700 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2 text-primary-800">
-                Adicione uma nova empresa
-              </h3>
-              <p className="text-gray-600">
-                Cadastre uma nova empresa para registrar um novo produto!
-              </p>
-            </div>
-          </Link>
+
         </div>
       </section>
     </>
