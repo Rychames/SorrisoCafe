@@ -111,7 +111,7 @@ export default function FormPageOthers({company, companies}: FormPageOthersProps
         <div className="p-6 md:p-12 bg-gray-100 min-h-screen relative z-10">
             <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg p-8">
                 <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">
-                    {company.name} - Inventário
+                    {company.name} - Inventário 
                 </h1>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Nome e Categoria */}
