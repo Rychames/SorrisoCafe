@@ -15,8 +15,14 @@ export default function InventoryPage() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get(`${BASE_URL}api/products/?companyId=${companyId}`);
-                setProducts(response.data.data);
+                const response = await axios.get(`${BASE_URL}api/products/`);
+                
+                // Filtrando os produtos que pertencem à empresa selecionada
+                const filteredProducts = response.data.data.filter((product: Product) => 
+                    product.received_company?.id === companyId
+                );
+                
+                setProducts(filteredProducts);
             } catch (error) {
                 console.error("Erro ao carregar os produtos:", error);
             } finally {
@@ -34,7 +40,7 @@ export default function InventoryPage() {
     return (
         <div className="p-6 md:p-12 bg-gray-100 min-h-screen">
             <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">
-                Inventário da Empresa {companyId}
+                Inventário da Empresa {products.length > 0 ? products[0]?.received_company?.name : "Desconhecida"}
             </h1>
 
             {products.length === 0 ? (

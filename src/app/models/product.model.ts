@@ -33,7 +33,7 @@ export interface Product {
     delivered_by: string,
     delivery_man_signature?: string,
     received_by: UserModel,
-    received_company?: string,
+    received_company?: Company,
     date_receipt: Date,
     current_company?: Company,
     images: ProductImage[] | null,

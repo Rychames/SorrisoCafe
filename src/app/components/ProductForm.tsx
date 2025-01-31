@@ -83,7 +83,7 @@ const ProductForm = ({ company }: ProductFormProps) => {
         });
 
         images.forEach((image) => {
-            form.append("images", image); // "images" será a chave usada no backend
+            form.append("images", image);
         });
 
         form.append("delivery_man_signature", images[0]);
@@ -101,14 +101,66 @@ const ProductForm = ({ company }: ProductFormProps) => {
             );
 
             if (response.data['success'] === true) {
-                Swal.fire("Sucesso", "Produto cadastrado com sucesso!", "success");
-                router.push("/inventory");  // Redirecionando para a página de inventário após sucesso
+                Swal.fire({
+                    title: "Sucesso!",
+                    text: "Produto cadastrado com sucesso!",
+                    icon: "success",
+                    showCancelButton: true,
+                    confirmButtonText: "Ir para o Inventário",
+                    cancelButtonText: "Cadastrar Novo Produto"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redireciona para o inventário da empresa selecionada
+                        router.push(`/companies/${company.id}/inventory`);
+                    } else {
+                        // Reseta o formulário para um novo cadastro
+                        resetForm();
+                    }
+                });
             }
         } catch (error) {
             console.error("Erro ao enviar o formulário:", error);
             Swal.fire("Erro", "Falha ao cadastrar o produto.", "error");
         }
     };
+
+    
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            category: '',
+            model: '',
+            company_brand: '',
+            description: '',
+            quantity: 0,
+            size: '',
+            lot: false,
+            sector: '',
+            delivered_by: '',
+            delivery_man_signature: null,
+            received_company: company.id,
+            current_company: company.id,
+            images: null,
+        });
+        setImages([]);
+        setPreviewImages([]);
+    
+        // Reseta os inputs manualmente
+        document.querySelectorAll("input, select, textarea").forEach((element) => {
+            if (element instanceof HTMLInputElement) {
+                if (element.type === "checkbox") {
+                    element.checked = false;
+                } else {
+                    element.value = "";
+                }
+            } else if (element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) {
+                element.value = "";
+            }
+        });
+    };
+    
+
+
 
     return (
         <div className="p-6 md:p-12 bg-gray-100 min-h-screen relative z-10">
@@ -167,6 +219,21 @@ const ProductForm = ({ company }: ProductFormProps) => {
                                 name="company_brand"
                                 type="text"
                                 placeholder="Marca"
+                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    {/* Setor */}
+                    <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                            <FaClipboard className="text-green-500" />
+                            <input
+                                name="sector"
+                                type="text"
+                                placeholder="Qual setor o produto vai ficar?"
                                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
                                 onChange={handleInputChange}
                                 required
