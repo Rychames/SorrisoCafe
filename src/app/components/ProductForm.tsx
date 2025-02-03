@@ -1,4 +1,3 @@
-// app/components/ProductForm.tsx
 "use client";
 
 import { useState } from "react";
@@ -11,7 +10,6 @@ import {
     FaClipboard,
     FaBox,
     FaCheckSquare,
-    FaClock,
     FaPen,
     FaWeight,
     FaImage,
@@ -21,10 +19,12 @@ import { Company, SendFormProduct } from "@/app/models";
 import { BASE_URL } from "../utils/constants";
 
 interface ProductFormProps {
-    company: Company; // A empresa passada deve ser recebida aqui
+    company: Company;
 }
 
 const ProductForm = ({ company }: ProductFormProps) => {
+    // ... (mantenha os states e métodos existentes)
+
     const [formData, setFormData] = useState<SendFormProduct>({
         name: '',
         category: '',
@@ -158,39 +158,49 @@ const ProductForm = ({ company }: ProductFormProps) => {
             }
         });
     };
-    
-
-
 
     return (
-        <div className="p-6 md:p-12 bg-gray-100 min-h-screen relative z-10">
-            <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg p-8">
-                <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">
-                    {company.name} - Inventário
-                </h1>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Nome e Categoria */}
-                    <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                            <FaUser className="text-green-500" />
+        <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
+            <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+                {/* Header */}
+                <div className="p-6 bg-gradient-to-r from-green-500 to-emerald-600">
+                    <h1 className="text-2xl md:text-3xl font-bold text-white">
+                        Cadastro de Produto
+                    </h1>
+                    <p className="text-emerald-100 mt-2">{company.name}</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
+                    {/* Grid Responsivo */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Nome */}
+                        <div className="space-y-2">
+                            <label className="flex items-center text-gray-700 mb-2">
+                                <FaUser className="mr-2 text-emerald-600" />
+                                Nome do Produto
+                            </label>
                             <input
                                 name="name"
                                 type="text"
-                                placeholder="Nome do Produto"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                 onChange={handleInputChange}
                                 required
                             />
                         </div>
-                        <div className="flex items-center space-x-3">
-                            <FaTag className="text-green-500" />
+
+                        {/* Categoria */}
+                        <div className="space-y-2">
+                            <label className="flex items-center text-gray-700 mb-2">
+                                <FaTag className="mr-2 text-emerald-600" />
+                                Categoria
+                            </label>
                             <select
                                 name="category"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                 onChange={handleInputChange}
                                 required
                             >
-                                <option value="">Selecione uma Categoria</option>
+                                <option value="">Selecione...</option>
                                 {categories.map((cat) => (
                                     <option key={cat} value={cat}>
                                         {cat}
@@ -198,139 +208,154 @@ const ProductForm = ({ company }: ProductFormProps) => {
                                 ))}
                             </select>
                         </div>
-                    </div>
 
-                    {/* Modelo e Marca */}
-                    <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                            <FaClipboard className="text-green-500" />
+                        {/* Modelo */}
+                        <div className="space-y-2">
+                            <label className="flex items-center text-gray-700 mb-2">
+                                <FaClipboard className="mr-2 text-emerald-600" />
+                                Modelo
+                            </label>
                             <input
                                 name="model"
                                 type="text"
-                                placeholder="Modelo do Produto"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                 onChange={handleInputChange}
                                 required
                             />
                         </div>
-                        <div className="flex items-center space-x-3">
-                            <FaBox className="text-green-500" />
+
+                        {/* Marca */}
+                        <div className="space-y-2">
+                            <label className="flex items-center text-gray-700 mb-2">
+                                <FaBox className="mr-2 text-emerald-600" />
+                                Marca
+                            </label>
                             <input
                                 name="company_brand"
                                 type="text"
-                                placeholder="Marca"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                 onChange={handleInputChange}
                                 required
                             />
                         </div>
-                    </div>
 
-                    {/* Setor */}
-                    <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                            <FaClipboard className="text-green-500" />
+                        {/* Setor */}
+                        <div className="space-y-2">
+                            <label className="flex items-center text-gray-700 mb-2">
+                                <FaClipboard className="mr-2 text-emerald-600" />
+                                Setor de Armazenamento
+                            </label>
                             <input
                                 name="sector"
                                 type="text"
-                                placeholder="Qual setor o produto vai ficar?"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                 onChange={handleInputChange}
                                 required
                             />
+                        </div>
+
+                        {/* Tamanho */}
+                        <div className="space-y-2">
+                            <label className="flex items-center text-gray-700 mb-2">
+                                <FaTag className="mr-2 text-emerald-600" />
+                                Tamanho
+                            </label>
+                            <select
+                                name="size"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                onChange={handleInputChange}
+                                required
+                            >
+                                <option value="">Selecione...</option>
+                                <option value="S">Pequeno (P)</option>
+                                <option value="M">Médio (M)</option>
+                                <option value="G">Grande (G)</option>
+                            </select>
+                        </div>
+
+                        {/* Quantidade */}
+                        <div className="space-y-2">
+                            <label className="flex items-center text-gray-700 mb-2">
+                                <FaWeight className="mr-2 text-emerald-600" />
+                                Quantidade
+                            </label>
+                            <input
+                                name="quantity"
+                                type="number"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+
+                        {/* Tipo de Embalagem */}
+                        <div className="space-y-2">
+                            <label className="flex items-center text-gray-700 mb-2">
+                                <FaCheckSquare className="mr-2 text-emerald-600" />
+                                Tipo de Embalagem
+                            </label>
+                            <div className="flex items-center space-x-3 bg-gray-50 p-4 rounded-lg">
+                                <input
+                                    name="lot"
+                                    type="checkbox"
+                                    id="unitOrBox"
+                                    className="h-5 w-5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                                    onChange={handleInputChange}
+                                />
+                                <label htmlFor="unitOrBox" className="text-gray-700">
+                                    Produto embalado em caixa
+                                </label>
+                            </div>
                         </div>
                     </div>
 
                     {/* Descrição */}
-                    <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                            <FaPen className="text-green-500" />
-                            <textarea
-                                name="description"
-                                placeholder="Descrição do Produto"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    {/* Quantidade e Tamanho */}
-                    <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                            <FaWeight className="text-green-500" />
-                            <input
-                                name="quantity"
-                                type="number"
-                                placeholder="Quantidade"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <FaTag className="text-green-500" />
-                            <select
-                                name="size"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
-                                onChange={handleInputChange}
-                                required
-                            >
-                                <option value="">Selecione o Tamanho</option>
-                                <option value="S">P</option>
-                                <option value="M">M</option>
-                                <option value="G">G</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* CheckBox */}
-                    <div className="flex items-center space-x-3">
-                        <FaCheckSquare className="text-green-500" />
-                        <input
-                            name="lot"
-                            type="checkbox"
-                            id="unitOrBox"
-                            className="h-5 w-5 text-green-500 border-gray-300 rounded focus:ring-green-300"
-                            onChange={handleInputChange}
-                        />
-                        <label htmlFor="unitOrBox" className="text-gray-700">
-                            Por Caixa (desmarcar para Unidade)
+                    <div className="space-y-2">
+                        <label className="flex items-center text-gray-700 mb-2">
+                            <FaPen className="mr-2 text-emerald-600" />
+                            Descrição
                         </label>
+                        <textarea
+                            name="description"
+                            rows={4}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
-                    {/* Entrega */}
-                    <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                            <FaUser className="text-green-500" />
-                            <input
-                                name="delivered_by"
-                                type="text"
-                                placeholder="Entregue Por"
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-green-300"
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </div>
+                    {/* Entregue Por */}
+                    <div className="space-y-2">
+                        <label className="flex items-center text-gray-700 mb-2">
+                            <FaUser className="mr-2 text-emerald-600" />
+                            Entregue Por
+                        </label>
+                        <input
+                            name="delivered_by"
+                            type="text"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
                     {/* Upload de Imagens */}
                     <div className="space-y-4">
-                        <label className="text-gray-700 font-bold mb-2 flex items-center space-x-2">
-                            <FaImage className="text-green-500" />
-                            <span>Imagens do Produto</span>
+                        <label className="flex items-center text-gray-700 mb-2">
+                            <FaImage className="mr-2 text-emerald-600" />
+                            Imagens do Produto
                         </label>
-                        <div className="border border-gray-300 p-4 rounded-lg bg-gray-50">
-                            <div className="flex items-center justify-between">
-                                <p className="text-gray-500 text-sm">
-                                    Você pode enviar até 5 imagens.
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <div className="mb-4">
+                                <p className="text-sm text-gray-500 mb-2">
+                                    Arraste imagens ou clique para selecionar
                                 </p>
                                 <label
                                     htmlFor="image-upload"
-                                    className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center space-x-2"
+                                    className="inline-flex items-center px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 cursor-pointer transition-colors"
                                 >
-                                    <FaPlus className="text-white" />
-                                    <span>Adicionar Imagem</span>
+                                    <FaPlus className="mr-2" />
+                                    Adicionar Imagens
                                 </label>
                                 <input
                                     type="file"
@@ -342,27 +367,33 @@ const ProductForm = ({ company }: ProductFormProps) => {
                                     onChange={handleImageUpload}
                                 />
                             </div>
-                            <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {previewImages.map((src, index) => (
-                                    <div
-                                        key={index}
-                                        className="relative rounded-lg overflow-hidden shadow-lg"
-                                    >
-                                        <img
-                                            src={src}
-                                            alt={`Prévia ${index + 1}`}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
+                            
+                            {/* Preview de Imagens */}
+                            {previewImages.length > 0 && (
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                                    {previewImages.map((src, index) => (
+                                        <div
+                                            key={index}
+                                            className="relative group rounded-lg overflow-hidden shadow-md"
+                                        >
+                                            <img
+                                                src={src}
+                                                alt={`Preview ${index + 1}`}
+                                                className="w-full h-32 object-cover"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
+                    {/* Botão de Submit */}
                     <button
                         type="submit"
-                        className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300"
+                        className="w-full py-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold flex items-center justify-center"
                     >
+                        <FaPlus className="mr-2" />
                         Cadastrar Produto
                     </button>
                 </form>
