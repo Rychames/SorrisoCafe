@@ -38,11 +38,11 @@ export default function Home() {
           </Link>
 
           {/* Controle de Produtos */}
-          <Link href="/product-control">
+          <Link href="/companies">
             <div className="bg-primary-100 hover:bg-primary-200 shadow-lg hover:shadow-xl p-6 rounded-xl cursor-pointer transition transform hover:-translate-y-2">
               <QrCodeIcon className="h-14 w-14 text-primary-700 mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2 text-primary-800">
-                Controle de Produtos
+                Empresas
               </h3>
               <p className="text-gray-600">
                 Registre e gerencie os produtos que chegam e saem da empresa,
@@ -51,7 +51,7 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Visualizar Inventário */}
+          {/* Visualizar Inventário
           <Link href="/inventory">
             <div className="bg-primary-100 hover:bg-primary-200 shadow-lg hover:shadow-xl p-6 rounded-xl cursor-pointer transition transform hover:-translate-y-2">
               <ClipboardDocumentListIcon className="h-14 w-14 text-primary-700 mx-auto mb-4" />
@@ -63,7 +63,7 @@ export default function Home() {
                 permanecem na empresa quanto os que foram enviados.
               </p>
             </div>
-          </Link>
+          </Link> */}
 
 
         </div>
