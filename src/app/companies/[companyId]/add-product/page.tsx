@@ -8,12 +8,12 @@ import { Company } from "@/app/models";
 
 export default function AddProductPage() {
     const params = useParams();
-    const companyId = params.id as string; // Assume que a rota dinâmica é [id]
+    // Alterado de params.id para params.companyId
+    const companyId = params.companyId as string; 
 
     const [company, setCompany] = useState<Company | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    // Adicione logs para depuração:
     useEffect(() => {
         const loadCompany = async () => {
             if (!companyId) return;
@@ -21,9 +21,9 @@ export default function AddProductPage() {
             try {
                 setIsLoading(true);
                 const response = await axios.get(`${BASE_URL}api/companies/${companyId}`);
-                console.log("Resposta da API:", response.data); // Debug aqui
+                console.log("Resposta da API:", response.data); // Debug
 
-                // Ajuste conforme estrutura real:
+                // Ajuste conforme a estrutura real da sua API:
                 const companyData = response.data.data || response.data;
                 setCompany(companyData);
             } catch (error) {

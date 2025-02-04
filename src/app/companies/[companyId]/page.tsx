@@ -6,7 +6,8 @@ import { BASE_URL } from '@/app/utils/constants';
 import { Company } from '@/app/models';
 
 export default function CompanyPage() {
-  const { id } = useParams();
+  const params = useParams();
+  const { companyId, productId } = params as { companyId: string; productId: string };  
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +15,7 @@ export default function CompanyPage() {
   useEffect(() => {
     const loadCompany = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}api/companies/${id}`);
+        const response = await axios.get(`${BASE_URL}api/companies/${companyId}`);
         
         const companyData = {
           id: response.data.data.id,
@@ -35,7 +36,7 @@ export default function CompanyPage() {
     };
 
     loadCompany();
-  }, [id]);
+  }, [companyId]);
 
   if (loading) {
     return (

@@ -11,12 +11,14 @@ import { Product } from "@/app/models";
 import { BASE_URL } from "@/app/utils/constants";
 import ExportButton from "@/app/components/ExportButton"; // ajuste o caminho conforme sua estrutura
 
+// Atualize a interface para refletir o novo nome do parâmetro
 interface InventoryPageProps {
-    params: Promise<{ id: string }>;
+    params: Promise<{ companyId: string }>;
 }
 
 const InventoryPage = ({ params }: InventoryPageProps) => {
-    const { id } = use(params);
+    // Extrai companyId em vez de id
+    const { companyId } = use(params);
     const [products, setProducts] = useState<Product[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [filters, setFilters] = useState({
@@ -39,8 +41,9 @@ const InventoryPage = ({ params }: InventoryPageProps) => {
                     ? response.data
                     : response.data.data;
 
+                // Filtra os produtos com base no id da empresa (agora companyId)
                 const filteredProducts = productsArray.filter((product: Product) => {
-                    return product.current_company?.id === Number(id);
+                    return product.current_company?.id === Number(companyId);
                 });
 
                 setProducts(filteredProducts);
@@ -50,7 +53,7 @@ const InventoryPage = ({ params }: InventoryPageProps) => {
         };
 
         fetchProducts();
-    }, [id]);
+    }, [companyId]);
 
     // Aplica os filtros (busca, categoria, status)
     const filteredProducts = products.filter((product) => {
@@ -85,8 +88,9 @@ const InventoryPage = ({ params }: InventoryPageProps) => {
     }));
 
     const handleQuickView = (productId: number) => {
-        router.push(`/product/${productId}`);
+        router.push(`/companies/${companyId}/product/${productId}`);
     };
+
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -108,7 +112,7 @@ const InventoryPage = ({ params }: InventoryPageProps) => {
 
                         {/* Botão Novo Produto */}
                         <Link
-                            href={`/companies/${id}/add-product`}
+                            href={`/companies/${companyId}/add-product`}
                             className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg transition-all"
                         >
                             <FaPlus />
@@ -176,8 +180,8 @@ const InventoryPage = ({ params }: InventoryPageProps) => {
                             >
                                 <div
                                     className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm ${product.quantity > 0
-                                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100"
-                                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
+                                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100"
+                                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
                                         }`}
                                 >
                                     {product.quantity > 0 ? "Em Estoque" : "Esgotado"}

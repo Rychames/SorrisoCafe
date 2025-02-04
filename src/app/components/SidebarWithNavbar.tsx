@@ -1,8 +1,8 @@
-"use client"
-import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/app/context/AuthContext';
-import Link from 'next/link';
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
+import Link from "next/link";
 
 interface SidebarWithNavbarProps {
   children: React.ReactNode;
@@ -17,8 +17,23 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
   const pathname = usePathname();
   const { logout, user } = useAuth();
 
-  const isCompanyPage = pathname?.startsWith('/companies/');
-  const companyId = pathname?.split('/')[2];
+  // Detecta se a rota pertence a uma empresa e extrai o companyId
+  const isCompanyPage = pathname?.startsWith("/companies/");
+  const companyId = pathname?.split("/")[2];
+
+  // Estado para os filtros específicos da página de produto
+  const [filters, setFilters] = useState({
+    onlyQRCode: false,
+    showProductDetails: true,
+    showUserInfo: true,
+    showCompanyInfo: true,
+  });
+
+  // Função para atualizar os filtros quando o usuário clicar nos checkboxes
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: checked }));
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -30,19 +45,19 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
     };
 
     const handleClickOutside = (event: MouseEvent) => {
-      const dropdown = document.getElementById('dropdown-user');
+      const dropdown = document.getElementById("dropdown-user");
       if (dropdown && !dropdown.contains(event.target as Node)) {
         setIsUserDropdownOpen(false);
       }
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
-    document.addEventListener('mousedown', handleClickOutside);
-    
+    window.addEventListener("resize", handleResize);
+    document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
-      window.removeEventListener('resize', handleResize);
-      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -55,7 +70,11 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
   const isPublicPage = publicRoutes.includes(pathname);
 
   return (
-    <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isPublicPage ? 'justify-center' : ''}`}>
+    <div
+      className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${
+        isPublicPage ? "justify-center" : ""
+      }`}
+    >
       {!isPublicPage && (
         <>
           <nav className="fixed top-0 z-50 w-full bg-[#004022] border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -104,10 +123,16 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                         className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 dark:bg-gray-700 z-50"
                       >
                         <div className="px-4 py-3" role="none">
-                          <p className="text-sm text-gray-900 dark:text-white" role="none">
+                          <p
+                            className="text-sm text-gray-900 dark:text-white"
+                            role="none"
+                          >
                             {user?.name}
                           </p>
-                          <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
+                          <p
+                            className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
+                            role="none"
+                          >
                             {user?.email}
                           </p>
                         </div>
@@ -133,7 +158,7 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
           <aside
             id="logo-sidebar"
             className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 lg:translate-x-0 ${
-              isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
             }`}
             aria-label="Sidebar"
           >
@@ -164,7 +189,6 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                       <span className="text-gray-500 dark:text-gray-400 text-sm font-light">
                         Gerenciamento da Empresa
                       </span>
-                      
                       <div className="mt-2 space-y-2">
                         <Link
                           href={`/companies/${companyId}/add-product`}
@@ -177,7 +201,13 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                             fill="none"
                             viewBox="0 0 18 18"
                           >
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16"/>
+                            <path
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M9 1v16M1 9h16"
+                            />
                           </svg>
                           <span className="ms-3">Novo Produto</span>
                         </Link>
@@ -201,6 +231,60 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                     </div>
                   </li>
                 )}
+
+                {/* Seção de filtros extra para a página de produto */}
+                {isCompanyPage &&
+                  pathname.includes("/product/") && (
+                    <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className="px-2">
+                        <span className="text-gray-500 dark:text-gray-400 text-sm font-light">
+                          Filtros do Produto
+                        </span>
+                        <div className="mt-2 space-y-2">
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              name="onlyQRCode"
+                              checked={filters.onlyQRCode}
+                              onChange={handleFilterChange}
+                              className="mr-2"
+                            />
+                            <span>Somente QR Code</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              name="showProductDetails"
+                              checked={filters.showProductDetails}
+                              onChange={handleFilterChange}
+                              className="mr-2"
+                            />
+                            <span>Detalhes do Produto</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              name="showUserInfo"
+                              checked={filters.showUserInfo}
+                              onChange={handleFilterChange}
+                              className="mr-2"
+                            />
+                            <span>Informações do Usuário</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              name="showCompanyInfo"
+                              checked={filters.showCompanyInfo}
+                              onChange={handleFilterChange}
+                              className="mr-2"
+                            />
+                            <span>Informações da Empresa</span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  )}
 
                 <li>
                   <Link
@@ -232,7 +316,13 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                       fill="none"
                       viewBox="0 0 20 20"
                     >
-                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M7.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h2.25"/>
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M7.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h2.25"
+                      />
                     </svg>
                     <span className="ms-3">Configurações</span>
                   </Link>
@@ -243,7 +333,7 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
         </>
       )}
 
-      <div className={`p-4 ${isPublicPage ? '' : 'lg:ml-64'} mt-14`}>
+      <div className={`p-4 ${isPublicPage ? "" : "lg:ml-64"} mt-14`}>
         <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
           {children}
         </div>

@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 
 import { AuthProvider } from "@/app/context/AuthContext";
 import SidebarWithNavbar from "./components/SidebarWithNavbar";
+import { FilterProvider } from "./context/FilterContext";
 
 export const metadata = {
   title: "PPSCANNER",
@@ -20,10 +21,12 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <SidebarWithNavbar>
-            <link rel="icon" type="image/png" href="/ppicon.svg" sizes="32x32" />
-            <main className="flex min-h-screen">
-              <div className="flex-1">{children}</div>
-            </main>
+            <FilterProvider>
+              <link rel="icon" type="image/png" href="/ppicon.svg" sizes="32x32" />
+              <main className="flex min-h-screen">
+                <div className="flex-1">{children}</div>
+              </main>
+            </FilterProvider>
           </SidebarWithNavbar>
         </AuthProvider>
       </body>
