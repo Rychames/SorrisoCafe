@@ -1,82 +1,138 @@
-"use client";
+import ExcelJS from 'exceljs';
+import { Product } from '../models';
 
-import React from "react";
-import { FaFileExcel } from "react-icons/fa";
-
-interface ExportButtonProps {
-    exportData: any[]; // Os dados que serão exportados; idealmente, tipados conforme sua estrutura
+interface ExportToExcelProps {
+    products: Product[];
 }
 
-const ExportButton: React.FC<ExportButtonProps> = ({ exportData }) => {
-    const handleExport = async () => {
-        // Importa dinamicamente as bibliotecas para evitar problemas de build no Next.js
-        const XLSX = await import("xlsx");
-        const fileSaverModule = await import("file-saver");
-        // Alguns módulos exportam a função saveAs na propriedade default ou diretamente
-        const saveAs =
-            fileSaverModule.saveAs || fileSaverModule.default || fileSaverModule;
+const ExportToExcel: React.FC<ExportToExcelProps> = ({ products }) => {
+    const exportToExcel = async () => {
+        if (!products || products.length === 0) return;
 
-        // Cria uma nova estrutura de dados, gerando um ID sequencial para cada produto
-        const formattedData = exportData.map((item: any, index: number) => {
-            // Supondo que item contenha os demais campos (exceto o ID original)
-            return {
-                ID: index + 1, // ID sequencial na planilha
-                Nome: item.Nome,
-                Categoria: item.Categoria,
-                Modelo: item.Modelo,
-                Marca: item.Marca,
-                Descrição: item.Descrição,
-                Quantidade: item.Quantidade,
-                Setor: item.Setor,
-                "Empresa Atual": item["Empresa Atual"],
-                "Data de Cadastro": item["Data de Cadastro"],
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Inventário');
+
+        // Configuração das colunas
+        worksheet.columns = [
+            { header: 'ID', key: 'id' },
+            { header: 'Nome', key: 'name' },
+            { header: 'Categoria', key: 'category' },
+            { header: 'Modelo', key: 'model' },
+            { header: 'Marca', key: 'brand' },
+            { header: 'Descrição', key: 'description' },
+            { header: 'Quantidade', key: 'quantity' },
+            { header: 'Tamanho', key: 'size' },
+            { header: 'Lote', key: 'lot' },
+            { header: 'Setor', key: 'sector' },
+            { header: 'Entregue por', key: 'deliveredBy' },
+            { header: 'Retirado por', key: 'removedBy' }, // Nova coluna
+            { header: 'Recebido por', key: 'receivedBy' },
+            { header: 'Empresa Recebedora', key: 'receivedCompany' },
+            { header: 'Empresa Atual', key: 'currentCompany' },
+            { header: 'Assinatura', key: 'signature' },
+            { header: 'Data de Recebimento', key: 'receiptDate' },
+            { header: 'Horário', key: 'receiptTime' }, // Nova coluna
+            { header: 'Última Alteração', key: 'lastUpdate' } // Nova coluna
+        ];
+
+        // Estilo do cabeçalho
+        worksheet.getRow(1).eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '92D050' }
+            };
+            cell.font = {
+                name: 'Arial',
+                size: 12,
+                bold: true,
+                color: { argb: 'FFFFFFFF' }
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
             };
         });
 
-        // Cria a worksheet a partir dos dados formatados
-        const worksheet = XLSX.utils.json_to_sheet(formattedData);
+        // Adicionar dados
+        products.forEach((product, index) => {
+            const receiptDate = product.date_receipt ? new Date(product.date_receipt) : null;
 
-        // Recupera as chaves do cabeçalho (que estão na primeira linha)
-        const headerKeys = Object.keys(formattedData[0]);
-        // Define o estilo para cada célula do cabeçalho (linha 1)
-        for (let col = 0; col < headerKeys.length; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-            if (worksheet[cellAddress]) {
-                worksheet[cellAddress].s = {
-                    fill: { patternType: "solid", fgColor: { rgb: "92D050" } },
-                    font: { color: { rgb: "FFFFFF" }, bold: true, name: "Arial", sz: 12 },
-                    alignment: { horizontal: "center", vertical: "center" },
-                };
+            worksheet.addRow({
+                id: index + 1, // ID numérico sequencial
+                name: product.name,
+                category: product.category,
+                model: product.model,
+                brand: product.company_brand,
+                description: product.description,
+                quantity: product.quantity,
+                size: product.size,
+                lot: product.lot ? 'Sim' : 'Não',
+                sector: product.sector,
+                deliveredBy: product.delivered_by,
+                removedBy: product.delivered_by || 'N/A', // Supondo novo campo
+                receivedBy: `${product.received_by?.first_name} ${product.received_by?.last_name}`,
+                receivedCompany: product.received_company?.name || '',
+                currentCompany: product.current_company?.name || '',
+                signature: product.delivery_man_signature || 'N/A',
+                receiptDate: receiptDate ? receiptDate.toLocaleDateString('pt-BR') : "",
+                receiptTime: receiptDate ? receiptDate.toLocaleTimeString('pt-BR') : "", // Horário formatado
+                lastUpdate: receiptDate ? receiptDate.toLocaleString('pt-BR') : "" // Data+hora da última alteração
+            });
+        });
+
+        // Autoajuste de colunas com limites
+        worksheet.columns.forEach(column => {
+            if (column.eachCell) {
+                let maxLength = 0;
+                column.eachCell({ includeEmpty: true }, cell => {
+                    const cellValue = cell.value ? cell.value.toString() : '';
+                    const cellLength = Math.min(cellValue.length + 3, 50); // Máximo de 50 caracteres
+                    maxLength = Math.max(maxLength, cellLength);
+                });
+                column.width = maxLength;
             }
-        }
-
-        // Cria um novo workbook e adiciona a worksheet
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Inventário");
-
-        // Gera o arquivo binário com a opção cellStyles ativada
-        const excelBuffer = XLSX.write(workbook, {
-            bookType: "xlsx",
-            type: "array",
-            cellStyles: true, // Habilita os estilos de célula
         });
-        const data = new Blob([excelBuffer], {
-            type:
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+        // Aplicar bordas e estilos em todas as células
+        worksheet.eachRow((row, rowNumber) => {
+            row.eachCell(cell => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+
+                if (rowNumber > 1) {
+                    cell.font = { name: 'Arial', size: 11 };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                }
+            });
         });
-        // Dispara o download do arquivo com o nome "inventario.xlsx"
-        saveAs(data, "inventario.xlsx");
+
+        // Gerar e salvar arquivo
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `Inventario_${new Date().toISOString().split('T')[0]}.xlsx`;
+        link.click();
     };
 
     return (
         <button
-            onClick={handleExport}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all"
+            onClick={exportToExcel}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-all"
         >
-            <FaFileExcel />
-            Gerar Planilha
+            📄 Exportar Planilha Completa
         </button>
     );
 };
 
-export default ExportButton;
+export default ExportToExcel;

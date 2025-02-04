@@ -104,7 +104,7 @@ const InventoryPage = ({ params }: InventoryPageProps) => {
 
                     <div className="flex gap-4">
                         {/* Botão Gerar Planilha */}
-                        <ExportButton exportData={exportData} />
+                        <ExportButton products={filteredProducts} />
 
                         {/* Botão Novo Produto */}
                         <Link
