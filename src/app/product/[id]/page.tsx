@@ -3,27 +3,36 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { BASE_URL } from "@/app/utils/constants";
-import { Product } from "@/app/models";
 import axios from "axios";
+import { Product, Company } from "@/app/models";
 import PDFGenerator from "@/app/components/PDFGenerator";
 
 export default function ProductDetails() {
   const params = useParams();
-  const [product, setProduct] = useState<Product>();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProductAndCompany = async () => {
       try {
         if (!params.id) return;
-        const response = await axios.get(`api/products/${params.id}/`);
-        setProduct(response.data["data"]);
+
+        // Buscar produto
+        const productResponse = await axios.get(`/api/products/${params.id}/`);
+        const productData = productResponse.data["data"];
+        setProduct(productData);
+
+        // Buscar empresa se estiver relacionada ao produto
+        if (productData.current_company?.id) {
+          const companyResponse = await axios.get(`/api/companies/${productData.current_company.id}/`);
+          setCompany(companyResponse.data["data"]);
+        }
       } catch (error) {
-        console.error("Erro ao buscar o produto:", error);
+        console.error("Erro ao buscar os dados:", error);
       }
     };
 
-    fetchProduct();
+    fetchProductAndCompany();
   }, [params.id]);
 
   const handlePrint = () => {
@@ -57,7 +66,7 @@ export default function ProductDetails() {
 
         {/* Botões de Ação */}
         <div className="flex justify-end mt-6 gap-2 hidden-print">
-          <PDFGenerator product={product} />
+          {company && <PDFGenerator product={product} company={company} />}
           <button
             onClick={handlePrint}
             className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded shadow-md"
