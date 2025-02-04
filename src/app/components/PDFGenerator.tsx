@@ -1,153 +1,148 @@
 import React, { useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { PDFDownloadLink, Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer';
-import Modal from 'react-modal';  // Usando react-modal para o modal
-import { Product } from '@/app/models';
+import Modal from 'react-modal';
+import { Product, Company } from '@/app/models';
 
-// Estilos para o PDF
 const styles = StyleSheet.create({
     page: {
         flexDirection: 'column',
         backgroundColor: '#FFFFFF',
         padding: 40,
+        textAlign: 'justify',
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        borderBottomWidth: 1,
+        paddingBottom: 10,
+    },
+    logo: {
+        width: 80,
+        height: 80,
+    },
+    companyName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    title: {
+        fontSize: 20,
+        textAlign: 'center',
+        marginBottom: 20,
+        fontWeight: 'bold',
+    },
+    contentText: {
+        fontSize: 14,
+        marginBottom: 20,
+        textAlign: 'justify',
+        lineHeight: 1.5,
     },
     signatureBox: {
         marginTop: 30,
-        borderTopWidth: 1,
-        paddingTop: 15,
-        width: '60%',
+        width: '80%',
+        alignSelf: 'center',
+        alignItems: 'center',
     },
-    signatureText: {
-        fontSize: 12,
-        marginBottom: 5,
+    signatureImage: {
+        width: 200,
+        height: 50,
     },
     signatureLine: {
         borderBottomWidth: 1,
-        width: '100%',
-        marginTop: 25,
+        width: '60%',
+        marginTop: 5,
+        marginBottom: 5,
     },
-    qrcode: {
-        width: 100,
-        height: 100,
-        marginTop: 20,
+    signatureText: {
+        fontSize: 12,
+        marginTop: 5,
     },
 });
 
-// Componente de documento PDF com assinatura
-const PDFDocument = ({ product, signature }: { product: Product; signature: string }) => (
+const PDFDocument = ({ product, signature, company }: { product: Product; signature: string; company: Company }) => (
     <Document>
         <Page size="A4" style={styles.page}>
-            <Text style={styles.signatureText}>Comprovante de Recebimento</Text>
-            {/* Assinatura no PDF */}
+            <View style={styles.header}>
+                {company?.logo && <Image src={company.logo} style={styles.logo} />}
+                <Text style={styles.companyName}>{company?.name}</Text>
+            </View>
+            <Text style={styles.title}>Comprovante de Entrega</Text>
+            <Text style={styles.contentText}>
+                O produto "{product.name}" (Modelo: {product.model}, Categoria: {product.category}, Tamanho: {product.size})
+                da empresa {product.company_brand} foi entregue pelo funcionário {product.delivered_by}
+                da empresa {product.current_company?.name} para {product.received_by.first_name} {product.received_by.last_name}
+                da empresa {product.received_company?.name} no dia {new Date(product.date_receipt).toLocaleDateString()} às
+                {new Date(product.date_receipt).toLocaleTimeString()}.
+            </Text>
             <View style={styles.signatureBox}>
-                <Text style={styles.signatureText}>Assinatura do Recebedor:</Text>
-                <Image src={signature} style={styles.signatureLine} />
-                <Text style={{ ...styles.signatureText, marginTop: 5, fontSize: 10 }}>
-                    (Assinatura digital)
-                </Text>
+                <Image src={signature} style={styles.signatureImage} />
+                <View style={styles.signatureLine} />
+                <Text style={styles.signatureText}>Assinatura do Entregador</Text>
             </View>
         </Page>
     </Document>
 );
 
-const PDFGenerator = ({ product }: { product: Product }) => {
+const PDFGenerator = ({ product, company }: { product: Product; company: Company }) => {
     const signatureRef = useRef<SignatureCanvas>(null);
     const [signatureDataUrl, setSignatureDataUrl] = useState<string>('');
     const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
 
-    // Função para capturar a assinatura
     const handleSaveSignature = () => {
         if (signatureRef.current) {
-            const signature = signatureRef.current.toDataURL();
-            setSignatureDataUrl(signature);
-            setModalIsOpen(false); // Fecha o modal após salvar a assinatura
+            setSignatureDataUrl(signatureRef.current.toDataURL());
+            setModalIsOpen(false);
         }
     };
 
     return (
-        <div>
-            {/* Botão para abrir o modal */}
+        <div className="flex flex-col items-center">
             <button
                 onClick={() => setModalIsOpen(true)}
-                style={{
-                    marginBottom: '20px',
-                    backgroundColor: '#4CAF50',
-                    color: 'white',
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                }}
+                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
             >
                 Assinar
             </button>
 
-            {/* Modal de assinatura */}
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={() => setModalIsOpen(false)}
                 contentLabel="Assinar"
                 ariaHideApp={false}
-                style={{
-                    content: {
-                        padding: '20px',
-                        maxWidth: '80%',
-                        margin: 'auto',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                    },
-                }}
+                className="flex flex-col items-center bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg"
+                overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
             >
-                <h2>Assine abaixo</h2>
-                {/* Canvas responsivo */}
+                <h2 className="text-lg font-semibold mb-4">Assine abaixo</h2>
                 <SignatureCanvas
                     ref={signatureRef}
                     penColor="black"
-                    canvasProps={{
-                        width: '100%',
-                        height: 150,
-                        className: 'signature-canvas',
-                        style: { border: '1px solid #000' },
-                    }}
+                    canvasProps={{ width: 400, height: 150, className: "border border-gray-500 rounded-md" }}
                 />
-                <div>
+                <div className="flex gap-4 mt-4">
                     <button
                         onClick={handleSaveSignature}
-                        style={{
-                            marginTop: '10px',
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            padding: '10px 20px',
-                            border: 'none',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                        }}
+                        className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition"
                     >
-                        Salvar Assinatura
+                        Salvar
+                    </button>
+                    <button
+                        onClick={() => signatureRef.current?.clear()}
+                        className="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition"
+                    >
+                        Limpar
                     </button>
                 </div>
             </Modal>
 
-            {/* Se a assinatura foi capturada, mostrar o botão para download do PDF */}
             {signatureDataUrl && (
                 <PDFDownloadLink
-                    document={<PDFDocument product={product} signature={signatureDataUrl} />}
+                    document={<PDFDocument product={product} signature={signatureDataUrl} company={company} />}
                     fileName={`comprovante_${product.name}.pdf`}
+                    className="mt-4 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition"
                 >
-                    <button
-                        style={{
-                            marginTop: '20px',
-                            backgroundColor: '#28a745',
-                            color: 'white',
-                            padding: '10px 20px',
-                            border: 'none',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        Baixar Comprovante com Assinatura
-                    </button>
+                    Baixar PDF
                 </PDFDownloadLink>
             )}
         </div>
