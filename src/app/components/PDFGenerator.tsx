@@ -41,18 +41,18 @@ const styles = StyleSheet.create({
     },
     signatureBox: {
         marginTop: 30,
-        width: '80%',
+        width: '100%',
         alignSelf: 'center',
         alignItems: 'center',
     },
     signatureImage: {
-        width: 200,
-        height: 50,
+        width: 300,
+        height: 100,
     },
     signatureLine: {
         borderBottomWidth: 1,
-        width: '60%',
-        marginTop: 5,
+        width: '80%',
+        marginTop: 10,
         marginBottom: 5,
     },
     signatureText: {
@@ -71,9 +71,9 @@ const PDFDocument = ({ product, signature, company }: { product: Product; signat
             <Text style={styles.title}>Comprovante de Entrega</Text>
             <Text style={styles.contentText}>
                 O produto "{product.name}" (Modelo: {product.model}, Categoria: {product.category}, Tamanho: {product.size})
-                da empresa {product.company_brand} foi entregue pelo funcionário {product.delivered_by}
-                da empresa {product.current_company?.name} para {product.received_by.first_name} {product.received_by.last_name}
-                da empresa {product.received_company?.name} no dia {new Date(product.date_receipt).toLocaleDateString()} às
+                da empresa {product.company_brand} foi entregue pelo funcionário {product.delivered_by} 
+                da empresa {product.current_company?.name} para {product.received_by.first_name} {product.received_by.last_name} 
+                da empresa {product.received_company?.name} no dia {new Date(product.date_receipt).toLocaleDateString()} às 
                 {new Date(product.date_receipt).toLocaleTimeString()}.
             </Text>
             <View style={styles.signatureBox}>
@@ -99,8 +99,8 @@ const PDFGenerator = ({ product, company }: { product: Product; company: Company
 
     return (
         <div className="flex flex-col items-center">
-            <button
-                onClick={() => setModalIsOpen(true)}
+            <button 
+                onClick={() => setModalIsOpen(true)} 
                 className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
             >
                 Assinar
@@ -118,17 +118,17 @@ const PDFGenerator = ({ product, company }: { product: Product; company: Company
                 <SignatureCanvas
                     ref={signatureRef}
                     penColor="black"
-                    canvasProps={{ width: 400, height: 150, className: "border border-gray-500 rounded-md" }}
+                    canvasProps={{ width: 500, height: 200, className: "border border-gray-500 rounded-md" }}
                 />
                 <div className="flex gap-4 mt-4">
-                    <button
-                        onClick={handleSaveSignature}
+                    <button 
+                        onClick={handleSaveSignature} 
                         className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition"
                     >
                         Salvar
                     </button>
-                    <button
-                        onClick={() => signatureRef.current?.clear()}
+                    <button 
+                        onClick={() => signatureRef.current?.clear()} 
                         className="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition"
                     >
                         Limpar
@@ -137,8 +137,8 @@ const PDFGenerator = ({ product, company }: { product: Product; company: Company
             </Modal>
 
             {signatureDataUrl && (
-                <PDFDownloadLink
-                    document={<PDFDocument product={product} signature={signatureDataUrl} company={company} />}
+                <PDFDownloadLink 
+                    document={<PDFDocument product={product} signature={signatureDataUrl} company={company} />} 
                     fileName={`comprovante_${product.name}.pdf`}
                     className="mt-4 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition"
                 >

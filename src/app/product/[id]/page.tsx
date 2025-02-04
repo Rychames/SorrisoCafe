@@ -13,26 +13,18 @@ export default function ProductDetails() {
   const [company, setCompany] = useState<Company | null>(null);
 
   useEffect(() => {
-    const fetchProductAndCompany = async () => {
+    const fetchProduct = async () => {
       try {
         if (!params.id) return;
-
-        // Buscar produto
-        const productResponse = await axios.get(`/api/products/${params.id}/`);
-        const productData = productResponse.data["data"];
-        setProduct(productData);
-
-        // Buscar empresa se estiver relacionada ao produto
-        if (productData.current_company?.id) {
-          const companyResponse = await axios.get(`/api/companies/${productData.current_company.id}/`);
-          setCompany(companyResponse.data["data"]);
-        }
+        const response = await axios.get(`/api/products/${params.id}/`);
+        setProduct(response.data["data"]);
+        setCompany(response.data["data"].current_company); // Obtendo a empresa associada ao produto
       } catch (error) {
-        console.error("Erro ao buscar os dados:", error);
+        console.error("Erro ao buscar o produto:", error);
       }
     };
 
-    fetchProductAndCompany();
+    fetchProduct();
   }, [params.id]);
 
   const handlePrint = () => {
