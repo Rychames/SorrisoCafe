@@ -11,6 +11,19 @@
   --secondary-foreground: #171717;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -22,95 +35,63 @@
   }
 }
 
+
+/* Esconde elementos apenas na impressão */
+/* Esconde elementos apenas na impressão */
+/* Esconde elementos apenas na impressão */
 @media print {
-  body {
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    color: #000;
-    /* Forçar texto preto */
-    background: #fff;
-    /* Forçar fundo branco */
+  /* Define a orientação da página para paisagem */
+  @page {
+    size: A4 landscape;
+    margin: 5mm;
   }
 
-  header {
-    display: none;
-  }
-
-  .flex {
-    display: block !important;
-  }
-
-  .min-h-screen {
-    min-height: auto !important;
-  }
-
-  .bg-gray-50 {
-    background-color: white !important;
-  }
-
-  .bg-white {
-    background-color: white !important;
-  }
-
-  .shadow-lg {
-    box-shadow: none !important;
-  }
-
-  .rounded-lg {
-    border-radius: 4px !important;
-  }
-
-  .w-full {
-    width: 100% !important;
-  }
-
-  .p-6 {
-    padding: 16px !important;
-  }
-
-  .max-w-md {
-    max-width: 100% !important;
-  }
-
-  img {
-    width: 100px;
-    height: 100px;
-    margin: 10px auto;
-  }
-
-  .text-lg {
-    font-size: 14px !important;
-  }
-
-  .text-xl {
-    font-size: 18px !important;
-  }
-
-  .hidden-print {
+  /* Esconde a sidebar e a navbar na impressão */
+  .SidebarWithNavbar {
     display: none !important;
   }
 
-  .text-gray-700 {
-    color: #333 !important;
-  }
-
-  .text-gray-800 {
-    color: #222 !important;
-  }
-
-  .next-float-button,
-  .page-count,
-  .impressao-data {
+  /* Esconde os botões padrão do Next.js com ícone de raio na impressão */
+  button[aria-label="Lightning"] {
     display: none !important;
   }
 
-  .print-only {
-    display: block;
-    margin: 0 auto;
-  }
-
+  /* Esconde os botões de assinar, salvar PDF e imprimir apenas na impressão */
   .no-print {
-    display: none;
+    display: none !important;
+  }
+
+  /* Ajusta a área principal para melhor visualização na impressão */
+  .print-area {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    background: white;
+    color: black;
+    page-break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  /* Reduz tamanho das imagens para melhor aproveitamento do espaço */
+  .print-area img {
+    max-width: 60%;
+    height: auto;
+  }
+
+  /* Reduz tamanho das fontes para melhor ajuste */
+  .print-area h1, .print-area h2, .print-area p {
+    font-size: 14px;
   }
 }
+
+
+
+
+
+
+

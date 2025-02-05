@@ -34,7 +34,7 @@ export default function Header() {
           <div className="flex items-center space-x-8 mb-4 lg:mb-0">
             <ProtectedLink href='/'>
 
-                <img src="/ppscanner.svg" className="h-[4rem] w-auto" alt="Logo" />
+              <img src="/ppscanner.svg" className="h-[4rem] w-auto" alt="Logo" />
 
             </ProtectedLink>
 
@@ -59,25 +59,17 @@ export default function Header() {
           >
             <ul className="font-medium flex flex-col p-4 md:flex-row md:space-x-8 w-full md:w-auto border border-gray-100 rounded-lg bg-[#004022] md:mt-0 md:border-0 md:bg-transparent">
               <li className="flex-1 md:flex-none">
-                <ProtectedLink href="/add-product">
+                <ProtectedLink href="/add-companies">
                   <div className="group flex items-center justify-center py-3 px-4 text-white hover:text-gray-300 relative">
-                    Novo Produto
+                    Adicionar Empresa
                     <span className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#004022] to-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
                   </div>
                 </ProtectedLink>
               </li>
               <li className="flex-1 md:flex-none">
-                <ProtectedLink href="/">
+                <ProtectedLink href="/companies">
                   <div className="group flex items-center justify-center py-3 px-4 text-white hover:text-gray-300 relative">
-                    Gerencia dos produtos
-                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#004022] to-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-                  </div>
-                </ProtectedLink>
-              </li>
-              <li className="flex-1 md:flex-none">
-                <ProtectedLink href="/inventory">
-                  <div className="group flex items-center justify-center py-3 px-4 text-white hover:text-gray-300 relative">
-                    Consultar Produtos
+                    Empresas
                     <span className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#004022] to-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
                   </div>
                 </ProtectedLink>

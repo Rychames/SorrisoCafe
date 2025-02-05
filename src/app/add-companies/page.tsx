@@ -5,14 +5,25 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { BASE_URL } from "@/app/utils/";
+import Image from "next/image";
+
+export interface SendFormCompany {
+    logo: File | null;
+    name: string;
+    cnpj: string;
+    address: string;
+}
 
 export default function AddCompanyPage() {
     const router = useRouter();
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<SendFormCompany>({
+        logo: null,
         name: "",
         cnpj: "",
         address: ""
     });
+
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -21,7 +32,6 @@ export default function AddCompanyPage() {
         setError("");
         setIsLoading(true);
 
-        // Validação básica
         if (!formData.name || !formData.cnpj || !formData.address) {
             setError("Todos os campos são obrigatórios");
             setIsLoading(false);
@@ -29,7 +39,15 @@ export default function AddCompanyPage() {
         }
 
         try {
-            const response = await axios.post('api/companies/', formData);
+            const formDataToSend = new FormData();
+            formDataToSend.append("name", formData.name);
+            formDataToSend.append("cnpj", formData.cnpj);
+            formDataToSend.append("address", formData.address);
+            if (formData.logo) {
+                formDataToSend.append("logo", formData.logo);
+            }
+            
+            const response = await axios.post('api/companies/', formDataToSend);
 
             if (response.status === 201) {
                 Swal.fire({
@@ -38,7 +56,7 @@ export default function AddCompanyPage() {
                     icon: 'success',
                     confirmButtonText: 'OK'
                 }).then(() => {
-                    router.push("/"); // Ajuste a rota conforme sua aplicação
+                    router.push("/"); // Ajuste a rota conforme necessário
                 });
             }
         } catch (error: any) {
@@ -56,6 +74,24 @@ export default function AddCompanyPage() {
             ...prev,
             [name]: value
         }));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setFormData(prev => ({
+            ...prev,
+            logo: file
+        }));
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setPreviewImage(null);
+        }
     };
 
     return (
@@ -118,6 +154,24 @@ export default function AddCompanyPage() {
                             maxLength={300}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         />
+                    </div>
+
+                    {/* Upload de Logo */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Logo da Empresa (Opcional)
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg cursor-pointer"
+                        />
+                        {previewImage && (
+                            <div className="mt-4 flex justify-center">
+                                <Image src={previewImage} alt="Preview" width={150} height={150} className="rounded-lg shadow-md"/>
+                            </div>
+                        )}
                     </div>
 
                     <button

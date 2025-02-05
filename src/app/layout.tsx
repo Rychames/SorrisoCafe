@@ -1,7 +1,10 @@
 import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+
 import { AuthProvider } from "@/app/context/AuthContext";
+import SidebarWithNavbar from "./components/SidebarWithNavbar";
+import { FilterProvider } from "./context/FilterContext";
 
 export const metadata = {
   title: "PPSCANNER",
@@ -17,10 +20,19 @@ export default function RootLayout({
     <html lang="pt-br">
       <body>
         <AuthProvider>
-          <Header />
-          <link rel="icon" type="image/png" href="/ppicon.svg" sizes="32x32" />
-          <main className="min-h-screen flex flex-col">{children}</main>
-          <Footer />
+          <FilterProvider>
+            <SidebarWithNavbar>
+              <link
+                rel="icon"
+                type="image/png"
+                href="/ppicon.svg"
+                sizes="32x32"
+              />
+              <main className="flex min-h-screen">
+                <div className="flex-1">{children}</div>
+              </main>
+            </SidebarWithNavbar>
+          </FilterProvider>
         </AuthProvider>
       </body>
     </html>
