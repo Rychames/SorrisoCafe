@@ -20,14 +20,19 @@ export default function RootLayout({
     <html lang="pt-br">
       <body>
         <AuthProvider>
-          <SidebarWithNavbar>
-            <FilterProvider>
-              <link rel="icon" type="image/png" href="/ppicon.svg" sizes="32x32" />
+          <FilterProvider>
+            <SidebarWithNavbar>
+              <link
+                rel="icon"
+                type="image/png"
+                href="/ppicon.svg"
+                sizes="32x32"
+              />
               <main className="flex min-h-screen">
                 <div className="flex-1">{children}</div>
               </main>
-            </FilterProvider>
-          </SidebarWithNavbar>
+            </SidebarWithNavbar>
+          </FilterProvider>
         </AuthProvider>
       </body>
     </html>

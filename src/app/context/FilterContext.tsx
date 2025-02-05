@@ -1,26 +1,29 @@
+// src/app/context/FilterContext.tsx
 "use client";
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 
-export interface ProductFilters {
+interface FilterState {
   onlyQRCode: boolean;
   showProductDetails: boolean;
   showUserInfo: boolean;
   showCompanyInfo: boolean;
+  removeImages: boolean; // nova propriedade
 }
 
-interface FilterContextType {
-  filters: ProductFilters;
-  setFilters: React.Dispatch<React.SetStateAction<ProductFilters>>;
+interface FilterContextProps {
+  filters: FilterState;
+  setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
 }
 
-const FilterContext = createContext<FilterContextType | undefined>(undefined);
+const FilterContext = createContext<FilterContextProps | undefined>(undefined);
 
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
-  const [filters, setFilters] = useState<ProductFilters>({
+  const [filters, setFilters] = useState<FilterState>({
     onlyQRCode: false,
     showProductDetails: true,
     showUserInfo: true,
     showCompanyInfo: true,
+    removeImages: false,
   });
 
   return (

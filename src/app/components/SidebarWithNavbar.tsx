@@ -1,37 +1,41 @@
+// src/app/components/SidebarWithNavbar.tsx
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import Link from "next/link";
+import { useFilter } from "@/app/context/FilterContext";
 
-interface SidebarWithNavbarProps {
-  children: React.ReactNode;
-}
-
-const publicRoutes = ["/login", "/signup", "/VerifyCodePage", "/not-found"];
-
-const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
+const SidebarWithNavbar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { logout, user } = useAuth();
-
-  // Detecta se a rota pertence a uma empresa e extrai o companyId
   const isCompanyPage = pathname?.startsWith("/companies/");
   const companyId = pathname?.split("/")[2];
 
-  // Estado para os filtros específicos da página de produto
-  const [filters, setFilters] = useState({
-    onlyQRCode: false,
-    showProductDetails: true,
-    showUserInfo: true,
-    showCompanyInfo: true,
-  });
+  const { filters, setFilters } = useFilter();
 
-  // Função para atualizar os filtros quando o usuário clicar nos checkboxes
+  // Quando o filtro onlyQRCode for selecionado, podemos atualizar os outros para false (opcional)
+  const handleOnlyQRCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { checked } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      onlyQRCode: checked,
+      // Se o usuário marcar "Somente QR Code", desabilitamos/desmarcamos os outros filtros
+      showProductDetails: checked ? false : prev.showProductDetails,
+      showUserInfo: checked ? false : prev.showUserInfo,
+      showCompanyInfo: checked ? false : prev.showCompanyInfo,
+      removeImages: checked ? false : prev.removeImages,
+    }));
+  };
+
+  // Para os demais filtros, se onlyQRCode estiver ativo, eles ficam desabilitados
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
+    // Se onlyQRCode estiver ativo, não permitimos alterações nos outros filtros
+    if (filters.onlyQRCode) return;
     setFilters((prev) => ({ ...prev, [name]: checked }));
   };
 
@@ -43,18 +47,15 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
         setIsSidebarOpen(false);
       }
     };
-
     const handleClickOutside = (event: MouseEvent) => {
       const dropdown = document.getElementById("dropdown-user");
       if (dropdown && !dropdown.contains(event.target as Node)) {
         setIsUserDropdownOpen(false);
       }
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => {
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("mousedown", handleClickOutside);
@@ -67,14 +68,11 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
     }
   };
 
+  const publicRoutes = ["/login", "/signup", "/VerifyCodePage", "/not-found"];
   const isPublicPage = publicRoutes.includes(pathname);
 
   return (
-    <div
-      className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${
-        isPublicPage ? "justify-center" : ""
-      }`}
-    >
+    <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isPublicPage ? "justify-center" : ""}`}>
       {!isPublicPage && (
         <>
           <nav className="fixed top-0 z-50 w-full bg-[#004022] border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -95,7 +93,7 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                       <path
                         clipRule="evenodd"
                         fillRule="evenodd"
-                        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+                        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 01.75 10z"
                       />
                     </svg>
                   </button>
@@ -123,16 +121,10 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                         className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 dark:bg-gray-700 z-50"
                       >
                         <div className="px-4 py-3" role="none">
-                          <p
-                            className="text-sm text-gray-900 dark:text-white"
-                            role="none"
-                          >
+                          <p className="text-sm text-gray-900 dark:text-white" role="none">
                             {user?.name}
                           </p>
-                          <p
-                            className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
-                            role="none"
-                          >
+                          <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
                             {user?.email}
                           </p>
                         </div>
@@ -154,12 +146,10 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
               </div>
             </div>
           </nav>
-
           <aside
             id="logo-sidebar"
-            className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 lg:translate-x-0 ${
-              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+            className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
             aria-label="Sidebar"
           >
             <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
@@ -176,13 +166,12 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                       fill="currentColor"
                       viewBox="0 0 22 21"
                     >
-                      <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"/>
-                      <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"/>
+                      <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z" />
+                      <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
                     </svg>
                     <span className="ms-3">Dashboard</span>
                   </Link>
                 </li>
-
                 {isCompanyPage && (
                   <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="px-2">
@@ -211,7 +200,6 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                           </svg>
                           <span className="ms-3">Novo Produto</span>
                         </Link>
-                        
                         <Link
                           href={`/companies/${companyId}/inventory`}
                           className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
@@ -223,7 +211,7 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                             fill="currentColor"
                             viewBox="0 0 18 20"
                           >
-                            <path d="M17 5.923A1 1 0 0 0 16 5h-3V4a4 4 0 1 0-8 0v1H2a1 1 0 0 0-1 .923L.086 17.846A2 2 0 0 0 2.08 20h13.84a2 2 0 0 0 1.994-2.153L17 5.923ZM7 9a1 1 0 0 1-2 0V7h2v2Zm0-5a2 2 0 1 1 4 0v1H7V4Zm6 5a1 1 0 1 1-2 0V7h2v2Z"/>
+                            <path d="M17 5.923A1 1 0 0 0 16 5h-3V4a4 4 0 1 0-8 0v1H2a1 1 0 0 0-1 .923L.086 17.846A2 2 0 0 0 2.08 20h13.84a2 2 0 0 0 1.994-2.153L17 5.923ZM7 9a1 1 0 0 1-2 0V7h2v2Zm0-5a2 2 0 1 1 4 0v1H7V4Zm6 5a1 1 0 1 1-2 0V7h2v2Z" />
                           </svg>
                           <span className="ms-3">Ver Inventário</span>
                         </Link>
@@ -231,61 +219,71 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                     </div>
                   </li>
                 )}
-
-                {/* Seção de filtros extra para a página de produto */}
-                {isCompanyPage &&
-                  pathname.includes("/product/") && (
-                    <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-                      <div className="px-2">
-                        <span className="text-gray-500 dark:text-gray-400 text-sm font-light">
-                          Filtros do Produto
-                        </span>
-                        <div className="mt-2 space-y-2">
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              name="onlyQRCode"
-                              checked={filters.onlyQRCode}
-                              onChange={handleFilterChange}
-                              className="mr-2"
-                            />
-                            <span>Somente QR Code</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              name="showProductDetails"
-                              checked={filters.showProductDetails}
-                              onChange={handleFilterChange}
-                              className="mr-2"
-                            />
-                            <span>Detalhes do Produto</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              name="showUserInfo"
-                              checked={filters.showUserInfo}
-                              onChange={handleFilterChange}
-                              className="mr-2"
-                            />
-                            <span>Informações do Usuário</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              name="showCompanyInfo"
-                              checked={filters.showCompanyInfo}
-                              onChange={handleFilterChange}
-                              className="mr-2"
-                            />
-                            <span>Informações da Empresa</span>
-                          </label>
-                        </div>
+                {isCompanyPage && pathname.includes("/product/") && (
+                  <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="px-2">
+                      <span className="text-gray-500 dark:text-gray-400 text-sm font-light">
+                        Filtros do Produto
+                      </span>
+                      <div className="mt-2 space-y-2">
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            name="onlyQRCode"
+                            checked={filters.onlyQRCode}
+                            onChange={handleOnlyQRCodeChange}
+                            className="mr-2"
+                          />
+                          <span>Somente QR Code</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            name="showProductDetails"
+                            checked={filters.showProductDetails}
+                            onChange={handleFilterChange}
+                            className="mr-2"
+                            disabled={filters.onlyQRCode}
+                          />
+                          <span>Detalhes do Produto</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            name="showUserInfo"
+                            checked={filters.showUserInfo}
+                            onChange={handleFilterChange}
+                            className="mr-2"
+                            disabled={filters.onlyQRCode}
+                          />
+                          <span>Informações do Usuário</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            name="showCompanyInfo"
+                            checked={filters.showCompanyInfo}
+                            onChange={handleFilterChange}
+                            className="mr-2"
+                            disabled={filters.onlyQRCode}
+                          />
+                          <span>Informações da Empresa</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            name="removeImages"
+                            checked={filters.removeImages}
+                            onChange={handleFilterChange}
+                            className="mr-2"
+                            disabled={filters.onlyQRCode}
+                          />
+                          <span>Remover Imagens</span>
+                        </label>
                       </div>
-                    </li>
-                  )}
-
+                    </div>
+                  </li>
+                )}
                 <li>
                   <Link
                     href="/companies"
@@ -298,12 +296,11 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
                       fill="currentColor"
                       viewBox="0 0 18 18"
                     >
-                      <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z"/>
+                      <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143v-4.286A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
                     </svg>
                     <span className="ms-3">Empresas</span>
                   </Link>
                 </li>
-
                 <li>
                   <Link
                     href="/settings"
@@ -332,7 +329,6 @@ const SidebarWithNavbar: React.FC<SidebarWithNavbarProps> = ({ children }) => {
           </aside>
         </>
       )}
-
       <div className={`p-4 ${isPublicPage ? "" : "lg:ml-64"} mt-14`}>
         <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
           {children}
