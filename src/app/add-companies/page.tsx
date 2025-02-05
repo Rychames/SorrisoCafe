@@ -29,12 +29,7 @@ export default function AddCompanyPage() {
         }
 
         try {
-            const response = await axios.post(`${BASE_URL}api/companies/`, formData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
+            const response = await axios.post('api/companies/', formData);
 
             if (response.status === 201) {
                 Swal.fire({
