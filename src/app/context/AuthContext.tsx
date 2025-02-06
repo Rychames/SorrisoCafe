@@ -7,7 +7,7 @@ import { BASE_URL } from "@/app/utils/constants";
 import { UserModel } from "@/app/models";
 
 type AuthContextType = {
-  user: any;
+  user: UserModel | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;

@@ -18,6 +18,8 @@ export interface UserModel{
     email: string,
     first_name: string,
     last_name: string,
-    role: 'COMMON' | 'MODERATOR' | 'ADMIN',
+    role: UserRole,
     is_active: boolean,
 }
+
+export type UserRole = 'COMMON' | 'MODERATOR' | 'ADMIN';

@@ -6,5 +6,6 @@ export type {
     UpdateSendFormUserManagerModel,
     UpdateSendFormUserModel,
     SendFormUserModel,
-    UserModel
+    UserModel,
+    UserRole
 } from '@/app/models/user.model'

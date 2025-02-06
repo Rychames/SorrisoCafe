@@ -3,8 +3,6 @@ export interface SendFormCompany {
     name: string;
     cnpj: string;
     address: string;
-    industry?: string;
-    location?: string;
 }
 
 export interface Company {
@@ -13,8 +11,6 @@ export interface Company {
     name: string;
     cnpj: string;
     address: string;
-    industry?: string;
-    location?: string;
     products_count?: number;
     created_at?: string;
     updated_at?: string;

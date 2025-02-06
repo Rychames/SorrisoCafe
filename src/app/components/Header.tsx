@@ -79,7 +79,7 @@ export default function Header() {
                     {isDropdownOpen && (
                       <ul className="absolute bg-white text-black rounded-md shadow-lg right-0 mt-2 py-2 w-40 z-50">
                         {/* Exibe a opção "Administração" apenas se o usuário for admin */}
-                        {user?.role === 'admin' && (
+                        {user?.role === 'ADMIN' && (
                           <li>
                             <Link
                               href="/admin"

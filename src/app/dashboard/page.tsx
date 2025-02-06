@@ -56,7 +56,6 @@ export default function DashboardAllCompanies() {
     },
   ]);
 
-  // Dados simulados
   const totalUsers = 50;
   const totalCompanies = companies.length;
   const totalProducts = companies.reduce((acc, company) => acc + company.products.length, 0);
@@ -65,7 +64,6 @@ export default function DashboardAllCompanies() {
     return acc + companyTotal;
   }, 0);
 
-  // Dados para o gráfico: Número de produtos por empresa
   const chartData = {
     labels: companies.map((company) => company.name),
     datasets: [
@@ -77,14 +75,15 @@ export default function DashboardAllCompanies() {
     ],
   };
 
-  // Último produto cadastrado
-  let latestProduct: Product | null = null;
-  let latestProductCompany: Company | null = null;
+
+  const [latestProduct, setLatestProduct] = useState<Product | null>(null)
+  const [latestProductCompany, setLatestProductCompany] = useState<Company | null>(null)
+
   companies.forEach((company) => {
     company.products.forEach((prod) => {
       if (!latestProduct || new Date(prod.createdAt) > new Date(latestProduct.createdAt)) {
-        latestProduct = prod;
-        latestProductCompany = company;
+        setLatestProduct(prod);
+        setLatestProductCompany(company);
       }
     });
   });

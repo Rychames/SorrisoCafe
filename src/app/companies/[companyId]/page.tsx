@@ -114,7 +114,7 @@ export default function CompanyPage() {
             )}
             <div>
               <h1 className="text-3xl font-bold">{company.name}</h1>
-              <p className="opacity-90 mt-1">{company.industry}</p>
+              <p className="opacity-90 mt-1">{company.name}</p>
             </div>
           </div>
           <Link
@@ -138,7 +138,7 @@ export default function CompanyPage() {
         <StatCard
           icon={<FaChartLine className="text-2xl" />}
           title="Colaboradores"
-          value={company.employees?.toString() || 'Não informado'}
+          value={company.name?.toString() || 'Não informado'}
           color="bg-blue-100 text-blue-800"
         />
         <StatCard
@@ -158,7 +158,7 @@ export default function CompanyPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <DetailItem label="CNPJ" value={company.cnpj} />
-          <DetailItem label="Setor" value={company.industry} />
+          <DetailItem label="Setor" value={company.name} />
           <DetailItem label="Data de Cadastro" value="01/01/2023" />
           <DetailItem label="Última Atualização" value="15/09/2023" />
         </div>

@@ -164,7 +164,7 @@ export default function CompaniesPage() {
 
                     <div className="flex flex-wrap gap-2 mb-4">
                       <span className="px-3 py-1 bg-primary-100 text-primary-800 text-sm rounded-full">
-                        {company.industry || 'Setor não informado'}
+                        {company.name || 'Setor não informado'}
                       </span>
                       <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
                         0teste0 colaboradores
@@ -172,7 +172,7 @@ export default function CompaniesPage() {
                     </div>
 
                     <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>{company.location}</span>
+                      <span>{company.address}</span>
                       <span className="flex items-center gap-1">
                         <FaChartLine />
                         {company.products_count || 0} ativos
