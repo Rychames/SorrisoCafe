@@ -2,21 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Menu, X, Home, PlusCircle, Search, LogIn, User, LogOut } from 'lucide-react';
+import { Menu, X, Home, LogIn, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/app/context/AuthContext';
-import Swal from 'sweetalert2';
-import ProtectedLink from './ProtectLink'; // Importe o componente ProtectedLink
+import ProtectedLink from './ProtectLink';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Use o contexto de autenticação para obter o token e o usuário
+  // Obtenha o usuário, token e a função de logout a partir do contexto de autenticação
   const { user, token, logout } = useAuth();
 
   useEffect(() => {
-    // O token será gerido no AuthContext, então podemos remover a lógica aqui
+    // Lógica adicional se necessário, mas o token já é gerido pelo AuthContext
   }, [token]);
 
   const toggleMenu = () => {
@@ -24,7 +22,7 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-    logout(); // Chama a função logout do contexto para remover o token e deslogar
+    logout(); // Chama a função logout do contexto para deslogar
   };
 
   return (
@@ -32,12 +30,9 @@ export default function Header() {
       <nav className="bg-[#004022]">
         <div className="max-w-screen-xl flex flex-col lg:flex-row items-center justify-between mx-auto p-4">
           <div className="flex items-center space-x-8 mb-4 lg:mb-0">
-            <ProtectedLink href='/'>
-
+            <ProtectedLink href="/">
               <img src="/ppscanner.svg" className="h-[4rem] w-auto" alt="Logo" />
-
             </ProtectedLink>
-
             <button
               onClick={toggleMenu}
               type="button"
@@ -45,11 +40,7 @@ export default function Header() {
               aria-controls="navbar-default"
               aria-expanded={isMenuOpen}
             >
-              {isMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
 
@@ -74,9 +65,9 @@ export default function Header() {
                   </div>
                 </ProtectedLink>
               </li>
+
               {token ? (
                 <li className="flex-1 md:flex-none relative">
-                  {/* Ícone de usuário com dropdown */}
                   <div className="relative">
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -87,6 +78,19 @@ export default function Header() {
                     </button>
                     {isDropdownOpen && (
                       <ul className="absolute bg-white text-black rounded-md shadow-lg right-0 mt-2 py-2 w-40 z-50">
+                        {/* Exibe a opção "Administração" apenas se o usuário for admin */}
+                        {user?.role === 'admin' && (
+                          <li>
+                            <Link
+                              href="/admin"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="block px-4 py-2 text-sm hover:bg-gray-200"
+                            >
+                              <Home className="w-4 h-4 inline mr-2" />
+                              Administração
+                            </Link>
+                          </li>
+                        )}
                         <li>
                           <button
                             onClick={handleLogout}
@@ -102,8 +106,10 @@ export default function Header() {
                 </li>
               ) : (
                 <li className="flex-1 md:flex-none">
-                  {/* Botão de Login */}
-                  <Link href="/login" className="group flex items-center justify-center py-3 px-4 text-white bg-[#004022] rounded-lg hover:bg-[#3f5c57] relative">
+                  <Link
+                    href="/login"
+                    className="group flex items-center justify-center py-3 px-4 text-white bg-[#004022] rounded-lg hover:bg-[#3f5c57] relative"
+                  >
                     <LogIn className="mr-2 w-5 h-5 group-hover:text-gray-300" />
                     Login
                   </Link>
