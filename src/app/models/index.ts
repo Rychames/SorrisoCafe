@@ -7,5 +7,8 @@ export type {
     UpdateSendFormUserModel,
     SendFormUserModel,
     UserModel,
-    UserRole
+    UserRole,
+    isAdmin,
+    isModerator,
+    isCommon,
 } from '@/app/models/user.model'

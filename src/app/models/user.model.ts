@@ -23,3 +23,29 @@ export interface UserModel{
 }
 
 export type UserRole = 'COMMON' | 'MODERATOR' | 'ADMIN';
+
+export function isAdmin(user: UserModel | null): boolean {
+    if (user?.role === 'ADMIN'){
+        return true
+    }
+    return false
+}
+
+export function isModerator(user: UserModel | null): boolean {
+    if (user?.role === 'MODERATOR'){
+        return true
+    }
+    else if (user?.role === 'ADMIN'){
+        return true
+    }
+    return false
+}
+
+export function isCommon(user: UserModel | null): boolean {
+    if (user?.role === 'COMMON'){
+        return true
+    }
+    return false
+}
+
+
