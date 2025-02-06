@@ -157,7 +157,7 @@ export default function CompaniesPage() {
                         {company.industry || 'Setor não informado'}
                       </span>
                       <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
-                        {company.employees} colaboradores
+                        0teste0 colaboradores
                       </span>
                     </div>
 

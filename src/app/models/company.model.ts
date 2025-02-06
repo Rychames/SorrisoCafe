@@ -1,11 +1,9 @@
 export interface SendFormCompany {
-    logo?: File | string;  // Permite ambos os tipos para upload e atualização
+    logo?: File | string; 
     name: string;
     cnpj: string;
     address: string;
-    // Campos opcionais para expansão futura
     industry?: string;
-    employees?: number;
     location?: string;
 }
 
@@ -15,9 +13,7 @@ export interface Company {
     name: string;
     cnpj: string;
     address: string;
-    // Campos opcionais que podem ser adicionados posteriormente
     industry?: string;
-    employees?: number;
     location?: string;
     products_count?: number;
     created_at?: string;

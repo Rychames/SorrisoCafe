@@ -86,6 +86,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!loading) {
       const isPublicPath = publicRoutes.includes(pathname);
       
+      if(user?.role == 'ADMIN'){
+        console.log("Usuário é ADMIN")
+      }
+      if(user?.role == 'MODERATOR'){
+        console.log("Usuário é MODERATOR")
+      }
+      if(user?.role == 'COMMON'){
+        console.log("Usuário é COMMON")
+      }
+
       if (!user && !isPublicPath) {
         router.push("/login");
       }
