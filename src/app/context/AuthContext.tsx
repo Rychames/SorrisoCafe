@@ -1,20 +1,24 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import axios from "axios";
-import { BASE_URL } from "@/app/utils/constants";
-import { UserModel } from "@/app/models";
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import axios from 'axios';
+import { BASE_URL } from '@/app/utils/constants';
+import { UserModel, handleError, isAdmin, isApiError, isCommon, isModerator } from '@/app/models/user.model';
 
 type AuthContextType = {
   user: UserModel | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  isAdmin: boolean;
+  isModerator: boolean;
+  isCommon: boolean;
+  setUser: React.Dispatch<React.SetStateAction<UserModel | null>>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
-const publicRoutes = ["/login", "/signup", "/VerifyCodePage", "/not-found"];
+const publicRoutes = ['/login', '/signup', '/VerifyCodePage', '/not-found'];
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserModel | null>(null);
@@ -28,90 +32,83 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = useCallback(() => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem("authToken");
+    localStorage.removeItem('authToken');
     delete axios.defaults.headers.common['Authorization'];
-    router.push("/login");
+    router.push('/login');
   }, [router]);
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      const response = await axios.post('user/login/', {
-        email,
-        password,
-      });
-
+      const response = await axios.post('user/login/', { email, password });
       const { data } = response.data;
       const accessToken = data.access;
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      
       setToken(accessToken);
-      localStorage.setItem("authToken", accessToken);
+      localStorage.setItem('authToken', accessToken);
 
       const userResponse = await axios.get('user/profile/');
-      setUser(userResponse.data['data']);
-      router.push("/");
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "Erro ao fazer login"
-      );
+      setUser(userResponse.data.data);
+      router.push('/');
+    } catch (error) {
+      const handledError = handleError(error);
+      throw new Error(handledError.message);
     }
   }, [router]);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const storedToken = localStorage.getItem("authToken");
-      
-      if (storedToken) {
-        try {
-          axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-          const userResponse = await axios.get('user/profile/');
-          
-          setUser(userResponse.data['data']);
-          setToken(storedToken);
-        } catch (error) {
-          console.error("Erro na verificação do token:", error);
+      const storedToken = localStorage.getItem('authToken');
+      if (!storedToken) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+        const userResponse = await axios.get('user/profile/');
+        setUser(userResponse.data.data);
+        setToken(storedToken);
+      } catch (error) {
+        if (isApiError(error) && error.status === 401) {
           logout();
         }
-      } else {
-        delete axios.defaults.headers.common['Authorization'];
+        console.error('Erro na verificação do token:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initializeAuth();
   }, [logout]);
 
   useEffect(() => {
-    if (!loading) {
-      const isPublicPath = publicRoutes.includes(pathname);
-      
-      if(user?.role == 'ADMIN'){
-        console.log("Usuário é ADMIN")
-      }
-      if(user?.role == 'MODERATOR'){
-        console.log("Usuário é MODERATOR")
-      }
-      if(user?.role == 'COMMON'){
-        console.log("Usuário é COMMON")
-      }
+    if (loading || !pathname) return;
 
-      if (!user && !isPublicPath) {
-        router.push("/login");
-      }
-      
-      if (user && isPublicPath) {
-        router.push("/");
-      }
+    const isPublicPath = publicRoutes.includes(pathname);
+    if (!user && !isPublicPath) {
+      router.push('/login');
+    }
+    if (user && isPublicPath) {
+      router.push('/');
     }
   }, [user, loading, pathname, router]);
 
-  if (loading) {
-    return null;
-  }
+  const contextValue = {
+    user,
+    token,
+    login,
+    logout,
+    isAdmin: isAdmin(user),
+    isModerator: isModerator(user),
+    isCommon: isCommon(user),
+    setUser,
+  };
+
+  if (loading) return null;
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
@@ -120,7 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 };
