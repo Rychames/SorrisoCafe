@@ -1,50 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { UserModel } from '@/app/models/user.model'; // ajuste o caminho conforme sua estrutura
+import { BASE_URL } from '@/app/utils/constants'; // ajuste o caminho conforme sua estrutura
 
-export interface UserModel {
-  id?: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  is_active: string; // 'true' ou 'false'
-}
-
+// Definindo os tipos de role utilizados no frontend
 export type UserRole = 'admin' | 'moderador' | 'comum';
 
+// Interface extendida para incluir a role
 export interface ExtendedUserModel extends UserModel {
   role: UserRole;
 }
 
+// Função para mapear os dados vindos do backend para o modelo do frontend
+const mapBackendUserToFrontend = (backendUser: any): ExtendedUserModel => {
+  // Mapeamento dos valores de role do backend para os valores do frontend
+  const roleMap: Record<string, UserRole> = {
+    ADMIN: 'admin',
+    MODERATOR: 'moderador',
+    COMMON: 'comum',
+  };
+
+  return {
+    id: backendUser.id,
+    email: backendUser.email,
+    first_name: backendUser.first_name,
+    last_name: backendUser.last_name,
+    // Converte o boolean para string ('true' ou 'false')
+    is_active: backendUser.is_active ? 'true' : 'false',
+    role: roleMap[backendUser.role] || 'comum',
+  };
+};
+
 export default function AdminPage() {
-  // Simulação com 3 usuários
-  const [users, setUsers] = useState<ExtendedUserModel[]>([
-    {
-      id: 1,
-      email: 'admin@example.com',
-      first_name: 'Admin',
-      last_name: 'User',
-      is_active: 'true',
-      role: 'admin',
-    },
-    {
-      id: 2,
-      email: 'moderador@example.com',
-      first_name: 'Mod',
-      last_name: 'User',
-      is_active: 'false',
-      role: 'moderador',
-    },
-    {
-      id: 3,
-      email: 'comum@example.com',
-      first_name: 'Common',
-      last_name: 'User',
-      is_active: 'true',
-      role: 'comum',
-    },
-  ]);
+  const [users, setUsers] = useState<ExtendedUserModel[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Buscando os usuários do backend ao montar o componente
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        // A URL completa utiliza a BASE_URL definida nos seus constants.
+        // Supondo que o endpoint seja: BASE_URL + 'user/manager/'
+        const response = await axios.get(`${BASE_URL}user/manager/`);
+        // Supondo que o backend retorne um array de usuários
+        const backendUsers = response.data;
+        const mappedUsers = backendUsers.map(mapBackendUserToFrontend);
+        setUsers(mappedUsers);
+      } catch (error) {
+        console.error('Erro ao buscar os usuários:', error);
+        alert('Ocorreu um erro ao buscar os usuários.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   // Função para alternar o status do usuário (ativar/desativar)
   const toggleUserActivation = async (id: number) => {
@@ -52,35 +65,32 @@ export default function AdminPage() {
     const user = users.find((user) => user.id === id);
     if (!user) return;
 
-    // Define o novo status (inverte o valor atual)
-    const newStatus = user.is_active === 'true' ? 'false' : 'true';
+    // Calcula o novo status: converte 'true' para false e vice-versa
+    const newStatusBoolean = user.is_active !== 'true';
+    const newStatusString = newStatusBoolean ? 'true' : 'false';
 
     try {
-      // Simula uma chamada à API utilizando uma URL fake
-      // Substitua a URL abaixo pelo endpoint real quando estiver disponível
-      await axios.patch(`https://fakeapi.com/users/${id}`, {
-        is_active: newStatus,
+      // O backend espera o campo is_active como boolean
+      await axios.patch(`${BASE_URL}user/manager/${id}`, {
+        is_active: newStatusBoolean,
       });
 
       // Atualiza o estado local para refletir a alteração
       setUsers((prevUsers) =>
-        prevUsers.map((u) =>
-          u.id === id ? { ...u, is_active: newStatus } : u
-        )
+        prevUsers.map((u) => (u.id === id ? { ...u, is_active: newStatusString } : u))
       );
 
-      alert(`Usuário ${id} ${newStatus === 'true' ? 'ativado' : 'desativado'} com sucesso!`);
+      alert(`Usuário ${id} ${newStatusBoolean ? 'ativado' : 'desativado'} com sucesso!`);
     } catch (error) {
       console.error('Erro ao atualizar o usuário:', error);
       alert('Ocorreu um erro ao atualizar o usuário.');
     }
   };
 
-  // Função para deletar um usuário com integração via Axios
+  // Função para deletar um usuário
   const deleteUser = async (id: number) => {
     try {
-      // Chamada fictícia para deletar usuário
-      await axios.delete(`https://fakeapi.com/users/${id}`);
+      await axios.delete(`${BASE_URL}user/manager/${id}`);
 
       // Atualiza o estado removendo o usuário deletado
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
@@ -134,11 +144,10 @@ export default function AdminPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => toggleUserActivation(user.id!)}
-                      className={`px-3 py-1 mr-2 rounded ${
-                        user.is_active === 'true'
+                      className={`px-3 py-1 mr-2 rounded ${user.is_active === 'true'
                           ? 'bg-red-500 hover:bg-red-600'
                           : 'bg-green-500 hover:bg-green-600'
-                      } text-white`}
+                        } text-white`}
                     >
                       {user.is_active === 'true' ? 'Desativar Acesso' : 'Ativar Acesso'}
                     </button>
@@ -157,6 +166,10 @@ export default function AdminPage() {
       </div>
     );
   };
+
+  if (loading) {
+    return <p>Carregando usuários...</p>;
+  }
 
   return (
     <div className="p-4">

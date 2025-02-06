@@ -17,7 +17,16 @@ export default function CompaniesPage() {
     const loadCompanies = async () => {
       try {
         const response = await axios.get(`${BASE_URL}api/companies`);
-        setCompanies(response.data.data);
+
+        // Verifica se a resposta é um array ou se os dados estão dentro de .data
+        let companiesData: Company[] = [];
+        if (Array.isArray(response.data)) {
+          companiesData = response.data;
+        } else if (Array.isArray(response.data?.data)) {
+          companiesData = response.data.data;
+        }
+
+        setCompanies(companiesData);
       } catch (error) {
         console.error("Erro ao carregar empresas:", error);
         setError('Não foi possível carregar as empresas. Tente novamente mais tarde.');
@@ -28,7 +37,8 @@ export default function CompaniesPage() {
     loadCompanies();
   }, []);
 
-  const filteredCompanies = companies.filter(company =>
+  // Mesmo que, por algum motivo, companies seja undefined, usamos fallback para array vazio
+  const filteredCompanies = (companies || []).filter(company =>
     company.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
