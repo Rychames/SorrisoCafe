@@ -51,105 +51,107 @@ export const showErrorAlert = (title: string, text: string) => {
 };
 
 export const ProductAlerts = {
-  withdraw: async (
-    maxQuantity: number,
-    product: Product,
-    company: Company
-  ) => {
-    const basicData = await Swal.fire(
-      createSwalOptions({
-        title: "Registro de Retirada",
-        html: `
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Autorização</label>
-              <select id="authorized" class="${SWAL_STYLES.select}">
-                <option value="Cindy">Cindy</option>
-                <option value="Dib">Dib</option>
-                <option value="Mariane">Mariane</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Responsável</label>
-              <select id="withdrawnBy" class="${SWAL_STYLES.select}">
-                <option value="Brasil">Brasil</option>
-                <option value="Bolsonaro">Bolsonaro</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
-              <input 
-                type="number" 
-                id="quantity" 
-                class="${SWAL_STYLES.input}"
-                min="1" 
-                max="${maxQuantity}"
-                placeholder="Ex: 5"
-              >
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
-              <textarea 
-                id="description" 
-                rows="3" 
-                class="${SWAL_STYLES.textarea}"
-                placeholder="Detalhes adicionais..."
-              ></textarea>
-            </div>
-          </div>
-        `,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: "Próximo",
-        cancelButtonText: "Cancelar",
-        preConfirm: () => {
-          const authorized = (document.getElementById("authorized") as HTMLSelectElement)?.value;
-          const withdrawnBy = (document.getElementById("withdrawnBy") as HTMLSelectElement)?.value;
-          const quantity = Number(
-            (document.getElementById("quantity") as HTMLInputElement)?.value
-          );
-          const description = (document.getElementById("description") as HTMLTextAreaElement)?.value;
-
-          if (!quantity || quantity <= 0 || quantity > maxQuantity) {
-            Swal.showValidationMessage(
-              "Quantidade inválida ou excede o estoque disponível"
-            );
-            return undefined;
-          }
-
-          return { authorized, withdrawnBy, quantity, description };
-        },
-      })
-    );
-
-    if (!basicData.isConfirmed) {
-      return basicData;
-    }
-
-    const signatures = await collectSignatures();
-    if (!signatures) {
-      return { isConfirmed: false };
-    }
-
-    // Gerar o PDF após coletar as assinaturas
-    const pdfDoc = (
-      <PDFDocument
-        product={product}
-        company={company}
-        signatures={signatures}
-      />
-    );
-    const pdfBlob = await pdf(pdfDoc).toBlob();
-    saveAs(pdfBlob, `comprovante_${product.name}.pdf`);
-
-    return {
-      isConfirmed: true,
-      value: {
-        ...basicData.value,
-        signatures,
+    withdraw: async (
+        maxQuantity: number,
+        product: Product,
+        company: Company
+      ) => {
+        const basicData = await Swal.fire(
+          createSwalOptions({
+            title: "Registro de Retirada",
+            html: `
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Autorização</label>
+                  <select id="authorized" class="${SWAL_STYLES.select}">
+                    <option value="Cindy">Cindy</option>
+                    <option value="Dib">Dib</option>
+                    <option value="Mariane">Mariane</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Responsável</label>
+                  <select id="withdrawnBy" class="${SWAL_STYLES.select}">
+                    <option value="Brasil">Brasil</option>
+                    <option value="Bolsonaro">Bolsonaro</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                  <input 
+                    type="number" 
+                    id="quantity" 
+                    class="${SWAL_STYLES.input}"
+                    min="1" 
+                    max="${maxQuantity}"
+                    placeholder="Ex: 5"
+                  >
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                  <textarea 
+                    id="description" 
+                    rows="3" 
+                    class="${SWAL_STYLES.textarea}"
+                    placeholder="Detalhes adicionais..."
+                  ></textarea>
+                </div>
+              </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: "Próximo",
+            cancelButtonText: "Cancelar",
+            preConfirm: () => {
+              const authorized = (document.getElementById("authorized") as HTMLSelectElement)?.value;
+              const withdrawnBy = (document.getElementById("withdrawnBy") as HTMLSelectElement)?.value;
+              const quantity = Number(
+                (document.getElementById("quantity") as HTMLInputElement)?.value
+              );
+              const description = (document.getElementById("description") as HTMLTextAreaElement)?.value;
+    
+              if (!quantity || quantity <= 0 || quantity > maxQuantity) {
+                Swal.showValidationMessage(
+                  "Quantidade inválida ou excede o estoque disponível"
+                );
+                return undefined;
+              }
+    
+              return { authorized, withdrawnBy, quantity, description };
+            },
+          })
+        );
+    
+        if (!basicData.isConfirmed) {
+          return basicData;
+        }
+    
+        const signatures = await collectSignatures();
+        if (!signatures) {
+          return { isConfirmed: false };
+        }
+    
+        // Gerar o PDF com quantidade retirada e descrição
+        const pdfDoc = (
+          <PDFDocument
+            product={product}
+            company={company}
+            signatures={signatures}
+            withdrawnQuantity={basicData.value.quantity}
+            description={basicData.value.description}
+          />
+        );
+        const pdfBlob = await pdf(pdfDoc).toBlob();
+        saveAs(pdfBlob, `comprovante_${product.name}.pdf`);
+    
+        return {
+          isConfirmed: true,
+          value: {
+            ...basicData.value,
+            signatures,
+          },
+        };
       },
-    };
-  },
 
   shipping: async () => {
     const result = await Swal.fire(
