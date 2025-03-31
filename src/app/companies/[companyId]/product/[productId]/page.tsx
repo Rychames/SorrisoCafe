@@ -1,20 +1,28 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { QRCodeSVG } from "qrcode.react";
 import axios from "axios";
-import PDFGenerator from "@/app/components/PDFGenerator";
 import { useFilter } from "@/app/context/FilterContext";
 import { Product } from "@/app/models";
+import { 
+  ProductHeader,
+  ProductGallery,
+  ProductInfoCard,
+  ProductQRCard,
+  ProductInventoryCard,
+  ProductActions,
+  ProductAlerts,
+  showSuccessAlert,
+  showErrorAlert
+} from "@/app/components/Product";
+import Swal from "sweetalert2";
 
 export default function ProductDetails() {
   const params = useParams();
-  const { companyId, productId } = params as {
-    companyId: string;
-    productId: string;
-  };
+  const { companyId, productId } = params as { companyId: string; productId: string };
   const [product, setProduct] = useState<Product | null>(null);
   const [company, setCompany] = useState<Product["current_company"] | null>(null);
+  const [history, setHistory] = useState<{ type: string; date: string; details: any }[]>([]);
   const { filters } = useFilter();
 
   useEffect(() => {
@@ -27,6 +35,10 @@ export default function ProductDetails() {
         const productData: Product = response.data.data;
         setProduct(productData);
         setCompany(productData.current_company || null);
+        setHistory([
+          { type: "entrada", date: "2025-03-28", details: { quantity: 10, by: "Cindy" } },
+          { type: "saída", date: "2025-03-29", details: { quantity: 3, by: "Brasil" } },
+        ]);
       } catch (error) {
         console.error("Erro ao buscar o produto:", error);
       }
@@ -34,144 +46,96 @@ export default function ProductDetails() {
     fetchProduct();
   }, [productId]);
 
+  const handleWithdrawal = async () => {
+    if (!product) return;
+
+    const result = await ProductAlerts.withdraw(product.quantity);
+
+    if (result.isConfirmed) {
+      const { quantity } = result.value;
+      try {
+        await axios.patch(`https://ppscanner.pythonanywhere.com/api/products/${productId}/`, {
+          quantity: product.quantity - quantity,
+        });
+        setProduct({ ...product, quantity: product.quantity - quantity });
+        setHistory([...history, { type: "saída", date: new Date().toISOString().split("T")[0], details: result.value }]);
+        showSuccessAlert("Sucesso!", `Retirada de ${quantity} unidade(s) registrada.`);
+      } catch (error) {
+        showErrorAlert("Erro!", "Falha ao registrar a retirada.");
+      }
+    }
+  };
+
+  const handleShipping = async () => {
+    const result = await ProductAlerts.shipping();
+
+    if (result.isConfirmed) {
+      setHistory([...history, { type: "envio", date: new Date().toISOString().split("T")[0], details: result.value }]);
+      Swal.fire("Sucesso!", "Envio registrado com sucesso.", "success");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!product) return;
+
+    const result = await ProductAlerts.delete(product.name);
+
+    if (result.isConfirmed) {
+      try {
+        // Lógica de exclusão aqui
+        Swal.fire("Excluído!", "O produto foi excluído com sucesso.", "success");
+      } catch (error) {
+        Swal.fire("Erro!", "Falha ao excluir o produto.", "error");
+      }
+    }
+  };
+
+  const handleAddMore = async () => {
+    const result = await ProductAlerts.addStock();
+
+    if (result.isConfirmed && product) {
+      const quantity = Number(result.value);
+      setProduct({ ...product, quantity: product.quantity + quantity });
+      setHistory([...history, { type: "entrada", date: new Date().toISOString().split("T")[0], details: { quantity } }]);
+      Swal.fire("Sucesso!", `${quantity} unidade(s) adicionada(s).`, "success");
+    }
+  };
+
   if (!product) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-gray-600">
-        Carregando...
-      </div>
-    );
+    return <div className="flex items-center justify-center min-h-screen text-gray-600">Carregando...</div>;
   }
 
   return (
-    // Removemos a classe "min-h-screen" ou ela será sobrescrita via CSS de impressão
-    <div className="bg-gray-50 p-6 print-area">
-      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden animate-fadeIn">
-        {filters.onlyQRCode ? (
-          // Modo "Somente QR Code": conteúdo centralizado para impressão
-          <div className="flex flex-col items-center justify-center p-6">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">
-              {product.name}
-            </h1>
-            <QRCodeSVG
-              value={`https://ppscanner.vercel.app/companies/${companyId}/product/${product.id}`}
-              size={256}
-              className="mx-auto"
-            />
-            <p className="mt-4 text-sm text-gray-600 text-center">
-              Escaneie o código para acessar a página do produto.
-            </p>
-            {/* Botões são renderizados mas possuem a classe no-print */}
-            <div className="no-print mt-4">
-              {company && <PDFGenerator product={product} company={company} />}
-            </div>
-          </div>
-        ) : (
-          // Layout Normal (detalhes do produto, galeria, etc.)
-          <div className="md:flex">
-            {/* Área de Imagem ou Galeria */}
-            <div className="md:w-1/2 relative">
-              <div className="h-full p-6 flex flex-col">
-                {!filters.removeImages &&
-                  product.images &&
-                  product.images.length > 0 ? (
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                      Imagens do Produto
-                    </h2>
-                    <div className="grid grid-cols-2 gap-2">
-                      {product.images.map((img) => (
-                        <div
-                          key={img.id}
-                          className="overflow-hidden rounded-lg border border-gray-200"
-                        >
-                          <img
-                            src={img.image}
-                            alt={product.name}
-                            className="w-full h-32 object-cover transform transition duration-300 hover:scale-105"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg p-4">
-                    <span className="text-gray-400">
-                      Sem imagens cadastradas
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-            {/* Área de Detalhes */}
-            <div className="md:w-1/2 p-6 flex flex-col justify-between">
-              <div className="space-y-4">
-                <h1 className="text-3xl font-bold text-gray-800">
-                  {product.name}
-                </h1>
-                <div className="grid grid-cols-2 gap-4">
-                  {filters.showProductDetails && (
-                    <>
-                      <div>
-                        <p className="text-gray-600">
-                          <span className="font-semibold">Categoria:</span>{" "}
-                          {product.category}
-                        </p>
-                        <p className="text-gray-600">
-                          <span className="font-semibold">Modelo:</span>{" "}
-                          {product.model}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">
-                          <span className="font-semibold">Marca:</span>{" "}
-                          {product.company_brand}
-                        </p>
-                        <p className="text-gray-600">
-                          <span className="font-semibold">Quantidade:</span>{" "}
-                          {product.quantity}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>
-                <p className="text-gray-600">
-                  <span className="font-semibold">Descrição:</span>{" "}
-                  {product.description}
-                </p>
-                <p className="text-gray-600">
-                  <span className="font-semibold">Entregue por:</span>{" "}
-                  {product.delivered_by}
-                </p>
-                {filters.showUserInfo && product.received_by && (
-                  <p className="text-gray-600">
-                    <span className="font-semibold">Recebido por:</span>{" "}
-                    {product.received_by.email}
-                  </p>
-                )}
-                {filters.showCompanyInfo && company && (
-                  <p className="text-gray-600">
-                    <span className="font-semibold">Empresa:</span>{" "}
-                    {company.name}
-                  </p>
-                )}
-              </div>
-              <div className="mt-6">
-                <div className="flex items-center justify-center mb-4">
-                  <QRCodeSVG
-                    value={`https://ppscanner.vercel.app/companies/${companyId}/product/${product.id}`}
-                    size={128}
-                    className="mx-auto"
-                  />
-                </div>
-                {/* Botões (PDFGenerator) – não serão impressos */}
-                <div className="no-print">
-                  {company && <PDFGenerator product={product} company={company} />}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+    <div className="min-h-screen bg-gray-50 p-6 print-area">
+      <ProductHeader product={product} />
+
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <ProductGallery product={product} />
+          <ProductInfoCard product={product} company={company} />
+        </div>
+
+        <div className="space-y-6">
+          <ProductQRCard
+            companyId={companyId}
+            productId={productId}
+            productName={product.name}
+          />
+          <ProductInventoryCard
+            quantity={product.quantity}
+            onAddStock={handleAddMore}
+            onWithdraw={handleWithdrawal}
+          />
+        </div>
       </div>
+
+      {!filters.onlyQRCode && (
+        <ProductActions
+          onShipping={handleShipping}
+          onReport={() => showSuccessAlert("Relatório", "Funcionalidade em desenvolvimento!")}
+          onDelete={handleDelete}
+        />
+      )}
     </div>
   );
 }

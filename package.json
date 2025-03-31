@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0 --port 3000",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -28,7 +28,7 @@
     "react-signature-canvas": "^1.0.7",
     "react-time-picker": "^7.0.0",
     "react-toastify": "^11.0.3",
-    "sweetalert2": "^11.15.10",
+    "sweetalert2": "^11.17.2",
     "xlsx": "^0.18.5",
     "xlsx-style": "^0.8.13"
   },
