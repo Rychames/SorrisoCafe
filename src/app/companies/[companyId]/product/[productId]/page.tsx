@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import axios from "axios";
 import { useFilter } from "@/app/context/FilterContext";
 import { Product } from "@/app/models";
-import { 
+import {
   ProductHeader,
   ProductGallery,
   ProductInfoCard,
@@ -13,9 +13,8 @@ import {
   ProductActions,
   ProductAlerts,
   showSuccessAlert,
-  showErrorAlert
+  showErrorAlert,
 } from "@/app/components/Product";
-import Swal from "sweetalert2";
 
 export default function ProductDetails() {
   const params = useParams();
@@ -47,9 +46,9 @@ export default function ProductDetails() {
   }, [productId]);
 
   const handleWithdrawal = async () => {
-    if (!product) return;
+    if (!product || !company) return;
 
-    const result = await ProductAlerts.withdraw(product.quantity);
+    const result = await ProductAlerts.withdraw(product.quantity, product, company);
 
     if (result.isConfirmed) {
       const { quantity } = result.value;
@@ -59,7 +58,7 @@ export default function ProductDetails() {
         });
         setProduct({ ...product, quantity: product.quantity - quantity });
         setHistory([...history, { type: "saída", date: new Date().toISOString().split("T")[0], details: result.value }]);
-        showSuccessAlert("Sucesso!", `Retirada de ${quantity} unidade(s) registrada.`);
+        showSuccessAlert("Sucesso!", `Retirada de ${quantity} unidade(s) registrada e comprovante gerado.`);
       } catch (error) {
         showErrorAlert("Erro!", "Falha ao registrar a retirada.");
       }
@@ -71,7 +70,7 @@ export default function ProductDetails() {
 
     if (result.isConfirmed) {
       setHistory([...history, { type: "envio", date: new Date().toISOString().split("T")[0], details: result.value }]);
-      Swal.fire("Sucesso!", "Envio registrado com sucesso.", "success");
+      showSuccessAlert("Sucesso!", "Envio registrado com sucesso.");
     }
   };
 
@@ -82,10 +81,10 @@ export default function ProductDetails() {
 
     if (result.isConfirmed) {
       try {
-        // Lógica de exclusão aqui
-        Swal.fire("Excluído!", "O produto foi excluído com sucesso.", "success");
+        await axios.delete(`https://ppscanner.pythonanywhere.com/api/products/${productId}/`);
+        showSuccessAlert("Excluído!", "O produto foi excluído com sucesso.");
       } catch (error) {
-        Swal.fire("Erro!", "Falha ao excluir o produto.", "error");
+        showErrorAlert("Erro!", "Falha ao excluir o produto.");
       }
     }
   };
@@ -94,10 +93,17 @@ export default function ProductDetails() {
     const result = await ProductAlerts.addStock();
 
     if (result.isConfirmed && product) {
-      const quantity = Number(result.value);
-      setProduct({ ...product, quantity: product.quantity + quantity });
-      setHistory([...history, { type: "entrada", date: new Date().toISOString().split("T")[0], details: { quantity } }]);
-      Swal.fire("Sucesso!", `${quantity} unidade(s) adicionada(s).`, "success");
+      const { quantity } = result.value;
+      try {
+        await axios.patch(`https://ppscanner.pythonanywhere.com/api/products/${productId}/`, {
+          quantity: product.quantity + quantity,
+        });
+        setProduct({ ...product, quantity: product.quantity + quantity });
+        setHistory([...history, { type: "entrada", date: new Date().toISOString().split("T")[0], details: result.value }]);
+        showSuccessAlert("Sucesso!", `${quantity} unidade(s) adicionada(s).`);
+      } catch (error) {
+        showErrorAlert("Erro!", "Falha ao adicionar estoque.");
+      }
     }
   };
 

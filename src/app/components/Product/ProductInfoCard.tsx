@@ -2,7 +2,7 @@ import { Product } from "@/app/models";
 
 interface ProductInfoCardProps {
   product: Product;
-  company?: Product["current_company"]; // Tornado opcional
+  company?: Product["current_company"] | null; // Aceita undefined ou null
 }
 
 export const ProductInfoCard = ({ product, company }: ProductInfoCardProps) => (
