@@ -71,7 +71,7 @@ const SidebarWithNavbar: React.FC<{ children: React.ReactNode }> = ({ children }
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isPublicPage ? "justify-center" : ""}`}>
       {!isPublicPage && (
         <>
-          <nav className="no-print fixed top-0 z-50 w-full bg-[#004022] border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+          <nav className="no-print fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
             <div className="px-3 py-3 lg:px-5 lg:pl-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center justify-start rtl:justify-end">
@@ -94,7 +94,7 @@ const SidebarWithNavbar: React.FC<{ children: React.ReactNode }> = ({ children }
                     </svg>
                   </button>
                   <Link href="/" className="flex ms-2 md:me-24">
-                    <img src="/ppscanner.svg" className="h-8 me-3" alt="Logo" />
+                    <img src="/sclogo.svg" className="h-8 me-3" alt="Logo" />
                   </Link>
                 </div>
                 <div className="flex items-center">

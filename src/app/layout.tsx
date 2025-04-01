@@ -7,8 +7,8 @@ import SidebarWithNavbar from "./components/SidebarWithNavbar";
 import { FilterProvider } from "./context/FilterContext";
 
 export const metadata = {
-  title: "PPSCANNER",
-  description: "Sistema de inventário com QR Code",
+  title: "Sorriso Café",
+  description: "Sistema de gestão de estoque do Sorriso Café",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
               <link
                 rel="icon"
                 type="image/png"
-                href="/ppicon.svg"
+                href="/scicon.svg"
                 sizes="32x32"
               />
               <main className="flex min-h-screen">

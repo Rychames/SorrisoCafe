@@ -31,7 +31,7 @@ export default function Header() {
         <div className="max-w-screen-xl flex flex-col lg:flex-row items-center justify-between mx-auto p-4">
           <div className="flex items-center space-x-8 mb-4 lg:mb-0">
             <ProtectedLink href="/">
-              <img src="/ppscanner.svg" className="h-[4rem] w-auto" alt="Logo" />
+              <img src="/sclogo.svg" className="h-[4rem] w-auto" alt="Logo" />
             </ProtectedLink>
             <button
               onClick={toggleMenu}

@@ -18,7 +18,7 @@ export default function Home() {
             Revolucione seu Controle Patrimonial
           </h1>
           <p className="text-xl text-gray-700 mb-12 leading-relaxed">
-            O PPSCANNER é a plataforma definitiva para gestão inteligente de patrimônio.
+            O Sorriso Café é a plataforma definitiva para gestão inteligente de patrimônio.
             Combine tecnologia de ponta, relatórios detalhados e controle total em tempo real
             para transformar a maneira como você gerencia seus ativos.
           </p>
